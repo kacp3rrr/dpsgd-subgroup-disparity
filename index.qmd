@@ -1,0 +1,56 @@
+---
+title: "DPSGD Subgroup Disparity"
+subtitle: "Analyzing Differentially Private Stochastic Gradient Descent (DPSGD) Under Class Imbalance and Subgroup Disparity"
+---
+
+Training a model with **differential privacy** (DP) guarantees that no single person's record changes the model much. The standard method, **DP-SGD**, does this by capping each example's influence (*clipping*) and adding random *noise*. The guarantee is defined **per record**, but the cost in accuracy is felt **per group**. Overall accuracy can hide that a few groups pay most of it.
+
+This project reproduces and analyses Esipova et al., *Disparate Impact in Differential Privacy from Gradient Misalignment* (ICLR 2023). We ask two questions:
+
+1. Does DP-SGD's accuracy cost fall unevenly when a group is **rare** (MNIST) and when it is just **harder to learn** (Adult)?
+2. Does the paper's mitigation, **DPSGD-Global-Adapt**, reduce that unevenness?
+
+## How we measure it
+
+For each group *k*, the **privacy cost** is π_k = accuracy without privacy − accuracy with privacy, in percentage points. The **privacy-cost gap** |π_a − π_b| is how much more one group pays than the other. The gap is not the plain accuracy difference, because groups can differ in accuracy before any privacy is added.
+
+## Results so far
+
+::: {.grid}
+::: {.g-col-12 .g-col-md-6}
+### [MNIST: class imbalance](notebooks/01_mnist_class_imbalance.html)
+{{< embed notebooks/01_mnist_class_imbalance.ipynb#fig-mnist-gap >}}
+
+We make the digit 8 rare on purpose (~1% of training data):
+
+- **DP-SGD:** the 8 loses about **61 points** of accuracy and the 2 about **9**.
+- **Global-Adapt:** **shrinks** that gap from about 53 to about 13 points, but does not close it.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### [Adult: subgroup disparity](notebooks/02_adult_subgroup_disparity.html)
+{{< embed notebooks/02_adult_subgroup_disparity.ipynb#fig-adult-gap >}}
+
+Census income prediction with men and women balanced to equal size:
+
+- **DP-SGD:** costs the harder group (men) about **11 points** and women about **4**.
+- **Global-Adapt:** **nearly closes** the gap (about 0.1 ± 0.2 points).
+:::
+:::
+
+Both tracks **closely track** the paper's published numbers. Hatched bars are Esipova et al.'s values; solid bars are ours.
+
+## Why it happens: the proposed mechanism
+
+- **Large gradients get clipped most.** Examples the model fits poorly produce large gradients, and clipping shrinks those the most.
+- **Clipping changes direction, not just size.** That tilts each update toward the well-fit majority. Esipova et al. call this **gradient misalignment**.
+- **The bias accumulates.** The noise is random and largely averages out over training; the clipping bias is systematic.
+- **Global-Adapt's fix:** it scales *all* gradients by one shared factor, which preserves their relative sizes and the update's direction. It never uses group labels.
+
+Our results so far are *consistent with* this explanation. Testing it directly is the next step.
+
+## What's next
+
+- **Folktables (ACS census data):** the main practical extension.
+- **Mechanism experiments:** per-group clipping and gradient angles.
+- **Smaller checks:** Adult at its natural sex ratio, and a matched-learning-rate check of Global-Adapt.

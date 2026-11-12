@@ -1,0 +1,39 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - index.qmd
+    - about.qmd
+    - notebooks/*.ipynb
+
+website:
+  title: "DPSGD Subgroup Disparity"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: notebooks/01_mnist_class_imbalance.ipynb
+        text: MNIST
+      - href: notebooks/02_adult_subgroup_disparity.ipynb
+        text: Adult
+      - href: about.qmd
+        text: About
+  page-navigation: true
+  page-footer:
+    center: "Reproduction and Expansion of Esipova et al. (ICLR 2023) · Hunter College, Big Data Analytics"
+
+execute:
+  enabled: false   # notebooks render from committed outputs; no GPU needed to build the site
+
+format:
+  html:
+    theme:
+      light: [flatly, theme/base.scss, theme/light.scss]
+      dark: [darkly, theme/base.scss, theme/dark.scss]   # toggle in navbar; light is the default
+    respect-user-color-scheme: false
+    smooth-scroll: true
+    title-block-banner: false
+    toc: true
+    code-fold: true
+    code-summary: "Code"
+    notebook-links: false

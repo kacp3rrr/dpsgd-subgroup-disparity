@@ -1,0 +1,25 @@
+/*-- scss:defaults --*/
+$body-bg: #15181c;
+$body-color: #e4e6e9;
+$primary: #8fb3e0;
+$link-color: #8fb3e0;
+$border-color: #2c3138;
+
+$navbar-bg: #15181c;
+$navbar-fg: #e4e6e9;
+$navbar-hl: #8fb3e0;
+$footer-bg: #15181c;
+$footer-fg: #9aa1ab;
+
+$code-block-bg: #1d2127;
+$table-border-color: #2c3138;
+
+/*-- scss:rules --*/
+#title-block-header .subtitle, .figure-caption, figcaption, .table-caption, caption { color: #9aa1ab; }
+
+// Figures are rendered on white by matplotlib; present them as light cards rather than recolouring.
+.cell-output-display img, .quarto-figure img {
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 6px;
+}

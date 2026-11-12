@@ -1,0 +1,29 @@
+---
+title: "About"
+---
+
+A reproduction-plus-analysis study by Kacper Lisowicz, Yunzhe Zheng and Daniel Lin. Done as a research project for Hunter College's **Big Data Analytics and Applied Privacy** course
+
+## Reproducibility
+
+- **Code and setup:** all code lives in the `dpdisparity` Python package. The notebooks only call it. See the repository README for setup.
+- **Where results come from:**
+  - Initial results from the [original testing repository](https://github.com/YunzheOVE/dp-subgroup-disparity)
+  - Adult has also been retrained with this repository's pipeline; its page compares the two.
+- **To retrain a dataset:** `uv run python scripts/sweep.py --dataset adult` (or `mnist`; use a GPU for MNIST).
+- **Hyperparameters:** Esipova et al. (2023), App. B.
+- **Privacy:** Poisson sampling, RDP accountant, δ = 10⁻⁶. Global-Adapt's private count is included in ε.
+- **Statistics:** values are means over 5 seeds ± standard error (SE = SD/√5), matching the paper's convention.
+- **The disparity measure** is the privacy-cost gap |mean(π_a − π_b)|. It is not the raw accuracy gap.
+
+## Literature
+
+| Paper | Role in this project |
+|---|---|
+| Esipova et al., *Disparate Impact in Differential Privacy from Gradient Misalignment*, ICLR 2023 | Main paper: mechanism, Global-Adapt, MNIST and Adult targets. Code: `layer6ai-labs/fair-dp` |
+| Bagdasaryan et al., *Differential Privacy Has Disparate Impact on Model Accuracy*, NeurIPS 2019 | Original observation: DP-SGD hurts underrepresented groups more |
+| Farrand et al., *Neither Private Nor Fair*, PPMLP 2020 | Even modest imbalance produces measurable disparity |
+| Sanyal et al., *How Unfair is Private Learning?*, UAI 2022 | Part of the gap is fundamental: DP limits learning rare examples |
+| Mangold et al., *Differential Privacy has Bounded Impact on Fairness in Classification*, ICML 2023 | The fairness gap from privacy is bounded and shrinks with more data |
+| Yao & Juarez, SaTML 2025 | Survey of proposed causes of disparate impact |
+| Demelius et al., TMLR 2025 | Conclusions depend on metric and hyperparameters |

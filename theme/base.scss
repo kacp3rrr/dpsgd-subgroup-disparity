@@ -1,0 +1,55 @@
+/*-- scss:defaults --*/
+// Shared by both modes (colours live in light.scss / dark.scss). Typography: serif headings, clean sans body, restrained navy accent.
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap");
+
+$font-family-sans-serif: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+$font-family-monospace: "JetBrains Mono", ui-monospace, monospace;
+$headings-font-family: "Source Serif 4", Georgia, serif;
+$headings-font-weight: 600;
+$font-size-root: 16px;
+$line-height-base: 1.65;
+
+
+/*-- scss:rules --*/
+.navbar {
+  border-bottom: 1px solid $border-color;
+  .navbar-title { font-family: $headings-font-family; font-weight: 600; letter-spacing: 0.01em; }
+  .nav-link { font-size: 0.92rem; font-weight: 500; }
+}
+
+#title-block-header {
+  border-bottom: 1px solid $border-color;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+  .title { font-size: 2.3rem; }
+  .subtitle { font-family: $font-family-sans-serif; font-weight: 400; color: #5b6470; font-size: 1.1rem; }
+}
+
+h2 {
+  border-bottom: none;
+  margin-top: 2.4rem;
+  padding-bottom: 0.3rem;
+}
+
+h3 { margin-top: 1.6rem; }
+
+// Tables: light rules, no zebra, tabular numerals.
+table {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.88rem;
+  th { font-weight: 600; border-bottom-width: 2px !important; }
+}
+
+.figure-caption, figcaption, .table-caption, caption {
+  font-size: 0.85rem;
+  color: #5b6470;
+}
+
+details.code-fold > summary { font-size: 0.82rem; color: #6b7280; }
+
+.nav-footer { border-top: 1px solid $border-color; font-size: 0.82rem; }
+
+// pandas row headers: plain, left-aligned, no shading.
+tbody th { background: transparent !important; text-align: left; font-weight: 500; }
+
+:not(pre) > code { color: $primary; background: transparent; padding: 0; }

@@ -1,0 +1,160 @@
+{
+ "dataset": "adult",
+ "method": "nonprivate",
+ "seed": 0,
+ "source": "rerun",
+ "config": {
+  "dataset": "adult",
+  "method": "nonprivate",
+  "epochs": 20,
+  "lr": 0.01,
+  "batch_size": 256,
+  "sigma": null,
+  "C": null,
+  "Z0": null,
+  "tau": null,
+  "sigma2": null,
+  "eta_Z": null,
+  "delta": 1e-06
+ },
+ "steps": 1840,
+ "train_counts": [
+  11719,
+  11765
+ ],
+ "history": [
+  {
+   "epoch": 1,
+   "train_loss": 0.5199266409086137
+  },
+  {
+   "epoch": 2,
+   "train_loss": 0.4132993520524469
+  },
+  {
+   "epoch": 3,
+   "train_loss": 0.37351081380850615
+  },
+  {
+   "epoch": 4,
+   "train_loss": 0.3513406996852067
+  },
+  {
+   "epoch": 5,
+   "train_loss": 0.33850944670130745
+  },
+  {
+   "epoch": 6,
+   "train_loss": 0.330264563476018
+  },
+  {
+   "epoch": 7,
+   "train_loss": 0.3243555895586961
+  },
+  {
+   "epoch": 8,
+   "train_loss": 0.31965145086474606
+  },
+  {
+   "epoch": 9,
+   "train_loss": 0.31576454767862466
+  },
+  {
+   "epoch": 10,
+   "train_loss": 0.31243048362361575
+  },
+  {
+   "epoch": 11,
+   "train_loss": 0.3095459178447967
+  },
+  {
+   "epoch": 12,
+   "train_loss": 0.30705356686226126
+  },
+  {
+   "epoch": 13,
+   "train_loss": 0.30487458608134643
+  },
+  {
+   "epoch": 14,
+   "train_loss": 0.3029789344362091
+  },
+  {
+   "epoch": 15,
+   "train_loss": 0.30133393840374767
+  },
+  {
+   "epoch": 16,
+   "train_loss": 0.29988990958860634
+  },
+  {
+   "epoch": 17,
+   "train_loss": 0.2986321986137836
+  },
+  {
+   "epoch": 18,
+   "train_loss": 0.29753115348323733
+  },
+  {
+   "epoch": 19,
+   "train_loss": 0.29660445723820333
+  },
+  {
+   "epoch": 20,
+   "train_loss": 0.29572887952436155
+  }
+ ],
+ "privacy": null,
+ "final_Z": null,
+ "evaluation": {
+  "overall": {
+   "n": 5871,
+   "accuracy": 0.8649293184280396,
+   "loss": 0.30228906869888306,
+   "tn": 4320,
+   "fp": 279,
+   "fn": 514,
+   "tp": 758,
+   "fnr": 0.40408805031446543,
+   "fpr": 0.060665362035225046,
+   "tpr": 0.5959119496855346
+  },
+  "groups": {
+   "Male": {
+    "n": 2941,
+    "accuracy": 0.8072084188461304,
+    "loss": 0.4098955988883972,
+    "tn": 1785,
+    "fp": 230,
+    "fn": 337,
+    "tp": 589,
+    "fnr": 0.36393088552915764,
+    "fpr": 0.1141439205955335,
+    "tpr": 0.6360691144708424
+   },
+   "Female": {
+    "n": 2930,
+    "accuracy": 0.9228668808937073,
+    "loss": 0.19427858293056488,
+    "tn": 2535,
+    "fp": 49,
+    "fn": 177,
+    "tp": 169,
+    "fnr": 0.5115606936416185,
+    "fpr": 0.018962848297213623,
+    "tpr": 0.4884393063583815
+   }
+  }
+ },
+ "provenance": {
+  "python": "3.12.16",
+  "torch": "2.11.0+cu128",
+  "opacus": "1.6.0",
+  "cuda": "12.8",
+  "device": "cpu",
+  "gpu": null,
+  "git_sha": null,
+  "timestamp": "2026-11-07T07:15:55+00:00",
+  "elapsed_s": 3.2
+ }
+}
