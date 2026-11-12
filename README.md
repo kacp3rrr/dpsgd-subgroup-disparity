@@ -50,7 +50,7 @@ dpsgd-subgroup-disparity/
 └── data/                      # raw dataset downloads (gitignored)
 ```
 
-## TODOs
+## TODO's
 
 - Get live site running
 - Folktables size sweep at a fixed number of training steps, to separate data size from training length, and be able to make the claim that disparity scales down with input size
