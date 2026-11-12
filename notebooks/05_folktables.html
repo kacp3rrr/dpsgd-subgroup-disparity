@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.11.1">
+<meta name="generator" content="quarto-1.11.9">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -73,18 +73,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/scrollable-regions/scrollable-regions.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ead67eae51fdb9500e4143da9fc54b59.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-47d3dcec3d4aa304090b8408ae466a6c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ead67eae51fdb9500e4143da9fc54b59.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-49c787a6c175d90e42264fbd7996148e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-d73632b6edfcf2cb5865c4f049755b27.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-49c787a6c175d90e42264fbd7996148e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-0f215663e3c347d2d0394a1ffab08844.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-2eef17dc6d5b91f875156422a81f8c7e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-0f215663e3c347d2d0394a1ffab08844.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a4fdfacc8dc0ea4efabeda844be85da3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-02ee83c8e965b42b6835df4eefa17818.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-a4fdfacc8dc0ea4efabeda844be85da3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -120,7 +121,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-fixed quarto-light"><a id="quarto-skip-link" class="visually-hidden-focusable" href="#quarto-document-content">Skip to main content</a><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -143,6 +144,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       for (let i=0; i < toggles.length; i++) {
         const toggle = toggles[i];
         if (toggle) {
+          toggle.setAttribute("aria-checked", alternate ? "true" : "false");
           if (alternate) {
             toggle.classList.add("alternate");
           } else {
@@ -172,13 +174,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       manageTransitions('#quarto-margin-sidebar .nav-link', true);
       // Switch the toggles
       setColorSchemeToggle(alternate)
-      // Hack to workaround the fact that safari doesn't
-      // properly recolor the scrollbar when toggling (#1455)
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455).
+    // Not run on load: stylesheets are set before first paint there, and
+    // scrolling would undo the scroll to a URL fragment (#14973).
+    // The one pixel nudge keeps the reader where they were.
+    const refreshSafariScrollbar = () => {
       if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
         manageTransitions("body", false);
-        window.scrollTo(0, 1);
+        const scrollY = window.scrollY;
+        window.scrollTo(0, scrollY > 0 ? scrollY - 1 : 1);
         setTimeout(() => {
-          window.scrollTo(0, 0);
+          window.scrollTo(0, scrollY);
           manageTransitions("body", true);
         }, 40);
       }
@@ -272,6 +280,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       // Read the current dark / light value
       let toAlternate = !hasAlternateSentinel();
       toggleColorMode(toAlternate);
+      refreshSafariScrollbar();
       setStyleSentinel(toAlternate);
       toggleGiscusIfUsed(toAlternate, darkModeDefault);
       window.dispatchEvent(new Event('resize'));
@@ -286,15 +295,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark" aria-label="Site">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">DPSGD Subgroup Disparity</span>
     </a>
   </div>
-            <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -322,8 +330,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <button type="button" role="switch" aria-checked="false" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode" aria-label="Toggle dark mode"><i class="bi"></i></button>
 </div>
+            <div id="quarto-search" class="" title="Search"></div>
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -332,7 +341,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
+        <nav id="TOC" role="doc-toc" aria-labelledby="toc-title" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
@@ -358,7 +367,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content" id="quarto-document-content" tabindex="-1">
 
 
 <header id="title-block-header" class="quarto-title-block default">
@@ -433,7 +442,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>A.settings_table(<span class="st">"folktables_sex"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-settings" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="2" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:52.874411Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:52.874262Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:52.880813Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:52.880376Z&quot;}}">
+<div id="tbl-folk-settings" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:52.874411Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:52.874262Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:52.880813Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:52.880376Z&quot;}}" data-execution_count="2">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-settings-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1: Hyperparameters: Adult presets (Esipova et al., App. B), with ε fixed at 3.41 and σ solved per run.
@@ -537,7 +546,7 @@ Table&nbsp;1: Hyperparameters: Adult presets (Esipova et al., App. B), with ε f
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pd.concat({<span class="st">"Adult (balanced)"</span>: A.base_rates(adult, <span class="st">"adult"</span>), <span class="st">"CA balanced"</span>: A.base_rates(bal, <span class="st">"folktables_sex"</span>),</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>           <span class="st">"CA natural ratio"</span>: A.base_rates(nat, <span class="st">"folktables_sex"</span>)})[cols]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-base" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="4" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:52.897342Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:52.897259Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:52.912614Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:52.912468Z&quot;}}">
+<div id="tbl-folk-base" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:52.897342Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:52.897259Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:52.912614Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:52.912468Z&quot;}}" data-execution_count="4">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-base-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;2: Test set per sex (ours, %, mean over 5 seeds; Adult = our dp-testing runs): share &gt; $50K, accuracy of always predicting ≤ $50K, non-private accuracy.
@@ -727,7 +736,7 @@ Figure&nbsp;5: Privacy-cost gap |π_Male − π_Female|, Adult vs CA at both sex
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"Adult (balanced)"</span>: A.headline(adult, <span class="st">"adult"</span>), <span class="st">"CA balanced"</span>: A.headline(bal, <span class="st">"folktables_sex"</span>),</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>              <span class="st">"CA natural ratio"</span>: A.headline(nat, <span class="st">"folktables_sex"</span>)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-vs-adult" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="10" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.235335Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.235254Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.262369Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.262091Z&quot;}}">
+<div id="tbl-folk-vs-adult" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.235335Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.235254Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.262369Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.262091Z&quot;}}" data-execution_count="10">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-vs-adult-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;3: Key numbers (ours, mean over 5 seeds, %): Adult vs CA balanced vs CA natural ratio.
@@ -866,7 +875,7 @@ Figure&nbsp;7: Privacy cost per sex vs training-set size, against the lr-0.01 no
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> gap_n[[<span class="st">"mean"</span>, <span class="st">"se"</span>]].<span class="bu">round</span>(<span class="dv">2</span>).join(info_n[[<span class="st">"sigma"</span>, <span class="st">"epsilon"</span>]])</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>out.rename(columns<span class="op">=</span>{<span class="st">"mean"</span>: <span class="st">"gap"</span>, <span class="st">"se"</span>: <span class="st">"SE"</span>, <span class="st">"sigma"</span>: <span class="st">"σ (solved)"</span>, <span class="st">"epsilon"</span>: <span class="st">"ε (achieved)"</span>}).rename_axis([<span class="st">"n"</span>, <span class="st">"Method"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-sweep" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="13" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.453787Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.453703Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.478665Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.478325Z&quot;}}">
+<div id="tbl-folk-sweep" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.453787Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.453703Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.478665Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.478325Z&quot;}}" data-execution_count="13">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-sweep-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;4: Size sweep (ours, mean ± SE, pp): gap per method, solved σ and achieved ε.
@@ -1017,7 +1026,7 @@ Table&nbsp;4: Size sweep (ours, mean ± SE, pp): gap per method, solved σ and a
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"train"</span>: race[<span class="dv">0</span>][<span class="st">"train_counts"</span>], <span class="st">"test"</span>: [race[<span class="dv">0</span>][<span class="st">"evaluation"</span>][<span class="st">"groups"</span>][g][<span class="st">"n"</span>] <span class="cf">for</span> g <span class="kw">in</span> RACES],</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>              <span class="st">"share &gt; $50K (%)"</span>: A.base_rates(race, <span class="st">"folktables_race"</span>)[<span class="st">"share positive"</span>].to_list()}, index<span class="op">=</span>RACES)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-race-counts" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="14" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.479474Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.479407Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.485797Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.485598Z&quot;}}">
+<div id="tbl-folk-race-counts" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.479474Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.479407Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.485797Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.485598Z&quot;}}" data-execution_count="14">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-race-counts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;5: White and Black Californians (seed 0 counts; share &gt; $50K is the 5-seed test mean).
@@ -1132,7 +1141,7 @@ Figure&nbsp;10: Privacy-cost gap |π_White − π_Black| (ours; mean ± SE; no p
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>           <span class="op">**</span>{<span class="ss">f"CA n = </span><span class="sc">{</span>n<span class="sc">:,}</span><span class="ss">"</span>: A.base_rates(r, <span class="st">"folktables_sex"</span>) <span class="cf">for</span> n, r <span class="kw">in</span> sweep.items()},</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>           <span class="st">"CA balanced"</span>: A.base_rates(bal, <span class="st">"folktables_sex"</span>), <span class="st">"CA race"</span>: A.base_rates(race, <span class="st">"folktables_race"</span>)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-baserate" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="18" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.680864Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.680776Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.718880Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.718494Z&quot;}}">
+<div id="tbl-folk-baserate" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.680864Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.680776Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.718880Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.718494Z&quot;}}" data-execution_count="18">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-baserate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;6: Does DP-SGD fall back to always predicting ≤ $50K? (ours, %, mean over 5 seeds). Headroom = non-private − constant accuracy. A fallback shows as FNR ≈ 100 and π ≈ headroom.
@@ -1464,7 +1473,7 @@ Figure&nbsp;13: Privacy cost per sex vs ε at n = 25,000, against the lr-0.01 ba
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> gap_e.set_index([<span class="st">"target ε"</span>, <span class="st">"method"</span>])[[<span class="st">"mean"</span>, <span class="st">"se"</span>]].<span class="bu">round</span>(<span class="dv">2</span>).join(info_e[[<span class="st">"sigma"</span>, <span class="st">"epsilon"</span>]])</span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>out.rename(columns<span class="op">=</span>{<span class="st">"mean"</span>: <span class="st">"gap"</span>, <span class="st">"se"</span>: <span class="st">"SE"</span>, <span class="st">"sigma"</span>: <span class="st">"σ (solved)"</span>, <span class="st">"epsilon"</span>: <span class="st">"ε (achieved)"</span>}).rename_axis([<span class="st">"target ε"</span>, <span class="st">"Method"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-eps" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="23" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.014567Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.014469Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.036725Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.036474Z&quot;}}">
+<div id="tbl-folk-eps" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.014567Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.014469Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.036725Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.036474Z&quot;}}" data-execution_count="23">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-eps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;7: ε sweep at n = 25,000 (ours, mean ± SE, pp): gap, solved σ and achieved ε.
@@ -1626,7 +1635,7 @@ Table&nbsp;7: ε sweep at n = 25,000 (ours, mean ± SE, pp): gap, solved σ and 
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>pd.concat({label: A.setting_summary({k: (runner.load(ds, SOURCE, baseline_lr<span class="op">=</span>lr, <span class="op">**</span>kw), ds) <span class="cf">for</span> k, (ds, kw) <span class="kw">in</span> CASES.items()})</span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>           <span class="cf">for</span> label, lr <span class="kw">in</span> {<span class="st">"lr 0.01 (preset)"</span>: <span class="va">None</span>, <span class="st">"lr 0.2 (matched)"</span>: <span class="fl">0.2</span>}.items()}, names<span class="op">=</span>[<span class="st">"non-private baseline"</span>, <span class="st">"setting"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-baseline" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="24" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.037699Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.037606Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.154621Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.153986Z&quot;}}">
+<div id="tbl-folk-baseline" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.037699Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.037606Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.154621Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.153986Z&quot;}}" data-execution_count="24">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-baseline-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;8: Privacy-cost gaps and Global-Adapt’s π against two non-private baselines: lr 0.01 (preset, used elsewhere on this page) and lr 0.2 (Global-Adapt’s). Ours; mean ± SE over 5 seeds, pp; pairs are first / second group.
@@ -1842,7 +1851,7 @@ Figure&nbsp;14: Privacy cost per sex vs training-set size, measured against the 
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>pd.concat({<span class="st">"CA balanced"</span>: A.run_info(bal), <span class="st">"CA natural ratio"</span>: A.run_info(nat), <span class="st">"CA race"</span>: A.run_info(race)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-runs" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="26" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.293666Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.293577Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.308009Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.307645Z&quot;}}">
+<div id="tbl-folk-runs" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.293666Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.293577Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.308009Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.307645Z&quot;}}" data-execution_count="26">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-runs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;9: Achieved ε (RDP, δ = 10⁻⁶), solved σ and final Z, means over seeds (ours).
@@ -2024,15 +2033,50 @@ Table&nbsp;9: Achieved ε (RDP, δ = 10⁻⁶), solved σ and final Z, means ove
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
     if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
-      const a = window.document.createElement('a');
-      a.classList.add('top-right');
-      a.classList.add('quarto-color-scheme-toggle');
-      a.href = "";
-      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const toggle = window.document.createElement('button');
+      toggle.type = "button";
+      toggle.setAttribute("role", "switch");
+      toggle.setAttribute("aria-checked", "false");
+      toggle.classList.add('top-right');
+      toggle.classList.add('quarto-color-scheme-toggle');
+      toggle.setAttribute("aria-label", "Toggle dark mode");
+      toggle.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
       const i = window.document.createElement("i");
       i.classList.add('bi');
-      a.appendChild(i);
-      window.document.body.appendChild(a);
+      toggle.appendChild(i);
+      // Put the toggle in a landmark of its own, so that landmark navigation
+      // can reach it.
+      //
+      // The container is always a fresh direct child of body, and the toggle is
+      // never moved into page furniture that the theme or the author controls.
+      // The toggle is positioned against the page, so any ancestor that
+      // establishes a containing block captures it: a positioned element or a
+      // grid for position: absolute, and transform, filter, will-change or
+      // contain for position: fixed. A direct child of body has none of these
+      // to inherit, and the shift when one appears is silent and visual.
+      //
+      // ARIA says a document should have at most one banner, and axe reports a
+      // duplicate whether or not the banners carry distinct labels. So use a
+      // header when the page has no banner yet, and a named region otherwise.
+      //
+      // A header is a banner wherever it sits, unless it is inside sectioning
+      // content, so this cannot just look at the children of body: a custom
+      // page layout wraps the title block header in a plain div. An explicit
+      // role="banner" always counts.
+      const sectioning = 'article, aside, main, nav, section, [role="article"], [role="complementary"], [role="main"], [role="navigation"], [role="region"]';
+      const hasBanner = Array.from(
+        window.document.querySelectorAll('header:not([role]), [role="banner"]')
+      ).some(function(el) {
+        return el.hasAttribute("role") || el.closest(sectioning) === null;
+      });
+      const container = window.document.createElement(hasBanner ? "div" : "header");
+      if (hasBanner) {
+        container.setAttribute("role", "region");
+        container.setAttribute("aria-label", "Toggle dark mode");
+      }
+      container.classList.add('quarto-color-scheme-toggle-container');
+      container.appendChild(toggle);
+      window.document.body.appendChild(container);
     }
     setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
@@ -2106,12 +2150,13 @@ Table&nbsp;9: Achieved ε (RDP, δ = 10⁻⁶), solved σ and final Z, means ove
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/kacp3rrr\.github\.io\/dpsgd-subgroup-disparity\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
       // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      window.quartoDecorateExternalLinks = function (root) {
+     var links = (root || window.document).querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
       for (var i=0; i<links.length; i++) {
         const link = links[i];
         if (!isInternal(link.href)) {
@@ -2120,8 +2165,69 @@ Table&nbsp;9: Achieved ε (RDP, δ = 10⁻⁶), solved σ and final Z, means ove
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
+          if (!link.classList.contains('no-external-icon')) {
+          }
         }
       }
+      };
+      window.quartoDecorateExternalLinks(window.document);
+    // Esc closes the popup (WCAG 1.4.13) and focus leaving both trigger and
+    // popup closes it (WCAG 2.4.11); tippy handles neither for interactive popups.
+    const hideOnEscAndFocusOut = {
+      name: 'hideOnEscAndFocusOut',
+      defaultValue: true,
+      fn(instance) {
+        const dismiss = () => {
+          // A show scheduled by the trigger delay would otherwise reopen it
+          instance.clearDelayTimeouts();
+          instance.hide();
+        };
+        const onKeyDown = (event) => {
+          if (event.key !== 'Escape') {
+            return;
+          }
+          // Keep Esc from also reaching page handlers (e.g. reveal.js overview),
+          // except an open reveal.js slide menu, which Esc should close too.
+          // The menu handles keys only when its keyboard option is on.
+          const menuHandlesEsc = window.Reveal?.getPlugin?.('menu')?.isOpen() &&
+            window.Reveal.getConfig().menu?.keyboard !== false;
+          if (!menuHandlesEsc) {
+            event.stopPropagation();
+          }
+          if (instance.popper.contains(window.document.activeElement)) {
+            // Disabled while refocusing so the focus trigger does not reopen it
+            instance.disable();
+            instance.reference.focus();
+            instance.enable();
+          }
+          dismiss();
+        };
+        const onFocusOut = (event) => {
+          const target = event.relatedTarget;
+          if (target && !instance.reference.contains(target) &&
+              !instance.popper.contains(target)) {
+            dismiss();
+          }
+        };
+        // On the trigger too: a click trigger (code-annotations: select) has no
+        // blur handling. Attached for the instance's lifetime so leaving the
+        // trigger also cancels a show still pending on the trigger delay.
+        instance.reference.addEventListener('focusout', onFocusOut);
+        return {
+          onShow() {
+            window.document.addEventListener('keydown', onKeyDown, true);
+            instance.popper.addEventListener('focusout', onFocusOut);
+          },
+          onHide() {
+            window.document.removeEventListener('keydown', onKeyDown, true);
+            instance.popper.removeEventListener('focusout', onFocusOut);
+          },
+          onDestroy() {
+            instance.reference.removeEventListener('focusout', onFocusOut);
+          },
+        };
+      },
+    };
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
       const config = {
         allowHTML: true,
@@ -2135,6 +2241,7 @@ Table&nbsp;9: Achieved ε (RDP, δ = 10⁻⁶), solved σ and final Z, means ove
         interactiveBorder: 10,
         theme: 'quarto',
         placement: 'bottom-start',
+        plugins: [hideOnEscAndFocusOut],
       };
       if (contentFn) {
         config.content = contentFn;
@@ -2297,44 +2404,54 @@ Table&nbsp;9: Achieved ε (RDP, δ = 10⁻⁶), solved σ and final Z, means ove
           const lineIds = lines.map((line) => {
             return targetCell + "-" + line;
           })
-          let top = null;
-          let height = null;
-          let parent = null;
+          // Each band is positioned against its own containing block, which is
+          // not the offsetParent of the lines, so place it from client rects.
+          const placeBand = (band, firstEl, lastEl, codeBlock) => {
+            const container = band.offsetParent;
+            if (container === null) {
+              return;
+            }
+            const containerRect = container.getBoundingClientRect();
+            // Reveal.js scales slides with a transform, so convert client
+            // pixels back to the CSS pixels of the container.
+            const scale = containerRect.height / container.offsetHeight || 1;
+            const firstRect = firstEl.getBoundingClientRect();
+            const lastRect = lastEl.getBoundingClientRect();
+            const top = (firstRect.top - containerRect.top) / scale - container.clientTop + container.scrollTop;
+            const height = (lastRect.bottom - firstRect.top) / scale;
+            band.style.top = top - 2 + "px";
+            band.style.height = height + 4 + "px";
+            if (codeBlock) {
+              // Without the copy button wrapper, the containing block is wider
+              // than the code block, so span the code block explicitly.
+              const blockRect = codeBlock.getBoundingClientRect();
+              band.style.left = (blockRect.left - containerRect.left) / scale - container.clientLeft + container.scrollLeft + "px";
+              band.style.width = blockRect.width / scale + "px";
+            }
+          };
           if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
+            const el = window.document.getElementById(lineIds[0]);
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const parent = el.parentElement.parentElement;
+            // cook up a div (if necessary) and position it
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
             }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
+            placeBand(div, el, lastEl, parent.closest("div.sourceCode") || parent);
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
             }
+            placeBand(gutterDiv, el, lastEl);
             selectedAnnoteEl = annoteEl;
           }
         };
@@ -2432,6 +2549,9 @@ Table&nbsp;9: Achieved ε (RDP, δ = 10⁻⁶), solved σ and final Z, means ove
       }
     }
   });
+  </script>
+  <script type="application/javascript">
+  window.quartoScrollableRegionsLabels = {"code":"Scrollable code","output":"Scrollable output"};
   </script>
 </div> <!-- /content -->
 <footer class="footer">
