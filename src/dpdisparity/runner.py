@@ -5,23 +5,36 @@ Legacy files are unmodified copies of dp-testing/results/{mnist,adult}/phase{1,2
 """
 
 import json
+from dataclasses import replace
+from pathlib import Path
 
-from .config import METHODS, RESULTS_DIR, RunCfg, preset
+from .config import FOLKTABLES_EPSILON, METHODS, RESULTS_DIR, RunCfg, preset
 from .train import train
 
 PHASE_METHOD = {1: "nonprivate", 2: "dpsgd", 4: "global_adapt"}
+
+
+def result_path(cfg: RunCfg, seed: int) -> Path:
+    """results/<dataset>/<method>_seed_<s>.json. Folktables nests by group and data variant,
+    e.g. results/folktables/sex/, results/folktables/sex/balanced/, results/folktables/sex/n25000_eps1/.
+    A learning rate other than the preset's adds `lr<lr>` (e.g. .../n5000_lr0.2/), so it never overwrites the preset run."""
+    eps = cfg.target_epsilon not in (None, FOLKTABLES_EPSILON)
+    lr = cfg.lr != preset(cfg.dataset, cfg.method).lr
+    variant = "_".join(v for v in ("balanced" if cfg.balance else "", f"n{cfg.n_train}" if cfg.n_train else "",
+                                   f"eps{cfg.target_epsilon:g}" if eps else "", f"lr{cfg.lr:g}" if lr else "") if v)
+    return RESULTS_DIR / cfg.dataset.replace("folktables_", "folktables/") / variant / f"{cfg.method}_seed_{seed}.json"
 
 
 def run_or_load(cfg: RunCfg, seeds=range(5), device: str = "auto", verbose: bool = True) -> list[dict]:
     """Reuse results/<dataset>/<method>_seed_<s>.json when its config matches; otherwise train and save."""
     out = []
     for seed in seeds:
-        path = RESULTS_DIR / cfg.dataset / f"{cfg.method}_seed_{seed}.json"
+        path = result_path(cfg, seed)
         if path.exists() and json.loads(path.read_text())["config"] == cfg.asdict():
             out.append(json.loads(path.read_text()))
             continue
         if verbose:
-            print(f"training {cfg.dataset}/{cfg.method} seed {seed} ...", flush=True)
+            print(f"training {path.relative_to(RESULTS_DIR).parent}/{cfg.method} seed {seed} ...", flush=True)
         result = train(cfg, seed, device)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(result, indent=1))
@@ -29,11 +42,20 @@ def run_or_load(cfg: RunCfg, seeds=range(5), device: str = "auto", verbose: bool
     return out
 
 
-def load(dataset: str, source: str = "legacy", seeds=range(5), device: str = "auto") -> list[dict]:
-    """All three methods x seeds. source="rerun" trains whatever is missing."""
+def load(dataset: str, source: str = "legacy", seeds=range(5), device: str = "auto", baseline_lr: float | None = None,
+         **options) -> list[dict]:
+    """All three methods x seeds. source="rerun" trains whatever is missing. `options` override preset
+    fields, e.g. balance=True, n_train=5000 or target_epsilon=1 on Folktables (non-private runs ignore ε).
+    `baseline_lr` swaps in a non-private baseline trained at that learning rate (e.g. Global-Adapt's 0.2)."""
     if source == "legacy":
         return load_legacy(dataset)
-    return [r for m in METHODS for r in run_or_load(preset(dataset, m), seeds, device)]
+    out = []
+    for m in METHODS:
+        cfg = replace(preset(dataset, m), **{k: v for k, v in options.items() if m != "nonprivate" or k != "target_epsilon"})
+        if m == "nonprivate" and baseline_lr is not None:
+            cfg = replace(cfg, lr=baseline_lr)
+        out += run_or_load(cfg, seeds, device)
+    return out
 
 
 def load_legacy(dataset: str) -> list[dict]:

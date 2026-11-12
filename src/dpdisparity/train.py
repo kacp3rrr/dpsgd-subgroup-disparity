@@ -10,6 +10,7 @@ import torch
 import torch.nn.functional as F
 from opacus import GradSampleModule
 from opacus.accountants import RDPAccountant
+from opacus.accountants.utils import get_noise_multiplier
 from opacus.data_loader import DPDataLoader
 from opacus.optimizers import DPOptimizer
 from torch.utils.data import DataLoader, TensorDataset
@@ -28,9 +29,17 @@ def resolve_device(device: str = "auto") -> str:
     return ("cuda" if torch.cuda.is_available() else "cpu") if device == "auto" else device
 
 
+def noise_multiplier(cfg: RunCfg, q: float) -> float:
+    """cfg.sigma, or the σ that reaches cfg.target_epsilon over the steps Opacus will take (int(1/q) per epoch)."""
+    if cfg.target_epsilon is None:
+        return cfg.sigma
+    return get_noise_multiplier(target_epsilon=cfg.target_epsilon, target_delta=cfg.delta, sample_rate=q,
+                                steps=cfg.epochs * int(1 / q), accountant="rdp")
+
+
 def train(cfg: RunCfg, seed: int, device: str = "auto") -> dict:
     device = resolve_device(device)
-    d = data.load(cfg.dataset, seed)
+    d = data.load(cfg.dataset, seed, cfg.balance, cfg.n_train)
     model = build_model(cfg.dataset, seed, d["meta"].get("input_dim")).to(device)
     train_ds = TensorDataset(d["X_train"], d["y_train"])
     loader = DataLoader(train_ds, batch_size=cfg.batch_size, shuffle=True)
@@ -41,7 +50,8 @@ def train(cfg: RunCfg, seed: int, device: str = "auto") -> dict:
         model = GradSampleModule(model)
         loader = DPDataLoader.from_data_loader(loader)  # Poisson sampling, q = 1 / len(loader)
         q = loader.sample_rate
-        kw = dict(noise_multiplier=cfg.sigma, max_grad_norm=cfg.C, expected_batch_size=int(len(train_ds) * q))
+        sigma = noise_multiplier(cfg, q)
+        kw = dict(noise_multiplier=sigma, max_grad_norm=cfg.C, expected_batch_size=int(len(train_ds) * q))
         if cfg.method == "global_adapt":
             optimizer = GlobalAdaptOptimizer(optimizer, Z0=cfg.Z0, tau=cfg.tau, sigma2=cfg.sigma2, eta_Z=cfg.eta_Z, **kw)
         else:
@@ -75,7 +85,8 @@ def train(cfg: RunCfg, seed: int, device: str = "auto") -> dict:
                 accountant.step(noise_multiplier=cfg.sigma2, sample_rate=q)
             result["final_Z"] = optimizer.Z
         result["privacy"] = {"epsilon": accountant.get_epsilon(cfg.delta), "delta": cfg.delta,
-                             "accountant": "rdp", "q": q, "poisson": True}
+                             "accountant": "rdp", "q": q, "poisson": True,
+                             "sigma": sigma}
         model = model._module
     result["evaluation"] = metrics.evaluate(model, d["X_test"], d["y_test"], d["g_test"], d["group_names"], device)
     result["provenance"] = provenance(device) | {"elapsed_s": round(time.time() - start, 1)}

@@ -7,7 +7,7 @@ Training a model with **differential privacy** (DP) guarantees that no single pe
 
 This project reproduces and analyses Esipova et al., *Disparate Impact in Differential Privacy from Gradient Misalignment* (ICLR 2023). We ask two questions:
 
-1. Does DP-SGD's accuracy cost fall unevenly when a group is **rare** (MNIST) and when it is just **harder to learn** (Adult)?
+1. Does DP-SGD's accuracy cost fall unevenly when a group is **rare** (MNIST) and when it is just **harder to learn** (Adult)? And how does that change on larger, modern census data as the training set grows (Folktables, our extension)?
 2. Does the paper's mitigation, **DPSGD-Global-Adapt**, reduce that unevenness?
 
 ## How we measure it
@@ -40,6 +40,23 @@ Census income prediction with men and women balanced to equal size:
 
 Both tracks **closely track** the paper's published numbers. Hatched bars are Esipova et al.'s values; solid bars are ours.
 
+### [Folktables: the same question at census scale](notebooks/05_folktables.html)
+
+::: {.grid}
+::: {.g-col-12 .g-col-md-7}
+{{< embed notebooks/05_folktables.ipynb#fig-folk-sweep >}}
+:::
+
+::: {.g-col-12 .g-col-md-5}
+Income prediction on 2018 California census data (ACSIncome, 195,665 people). The privacy budget is fixed (ε = 3.41) and only the amount of training data changes. All numbers are ours; no published DP-SGD result exists for this data, so this is an extension, not a reproduction.
+
+- **Small data:** with 5,000–10,000 training examples, DP-SGD costs men about **10 points** more than women. It falls back to almost always predicting "≤ $50K", as on Adult.
+- **Large data:** from 50,000 on, the gap is under **1 point**. On all of California it is about **0.1**, or 0.4 against a better-trained non-private baseline.
+- **Global-Adapt** keeps the gap at or below about **0.6 points** at every size.
+- **Clipping, not noise:** at a fixed size, the gap barely changes between ε = 0.5 and 8, and removing the noise entirely changes accuracy very little. Because every run trains for 20 epochs, data size and training length grow together in this sweep.
+:::
+:::
+
 ## Why it happens: the proposed mechanism
 
 - **Large gradients get clipped most.** Examples the model fits poorly produce large gradients, and clipping shrinks those the most.
@@ -47,10 +64,10 @@ Both tracks **closely track** the paper's published numbers. Hatched bars are Es
 - **The bias accumulates.** The noise is random and largely averages out over training; the clipping bias is systematic.
 - **Global-Adapt's fix:** it scales *all* gradients by one shared factor, which preserves their relative sizes and the update's direction. It never uses group labels.
 
-Our results so far are *consistent with* this explanation. Testing it directly is the next step.
+Our results so far are *consistent with* this explanation. Testing it directly is the next step. On Folktables, the large gaps appear when DP-SGD falls back to the majority answer, which happens with small training sets.
 
 ## What's next
 
-- **Folktables (ACS census data):** the main practical extension.
 - **Mechanism experiments:** per-group clipping and gradient angles.
-- **Smaller checks:** Adult at its natural sex ratio, and a matched-learning-rate check of Global-Adapt.
+- **Smaller checks:** Adult at its natural sex ratio, and a matched-learning-rate check of Global-Adapt vs DP-SGD. On Folktables, the non-private baseline has already been checked at Global-Adapt's learning rate; the gap conclusions hold.
+- **Folktables follow-up:** a size sweep at a fixed number of training steps, to separate data size from training length.

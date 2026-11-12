@@ -1,0 +1,161 @@
+{
+ "dataset": "folktables_sex",
+ "method": "nonprivate",
+ "seed": 1,
+ "source": "rerun",
+ "config": {
+  "dataset": "folktables_sex",
+  "method": "nonprivate",
+  "epochs": 20,
+  "lr": 0.01,
+  "batch_size": 256,
+  "sigma": null,
+  "C": null,
+  "Z0": null,
+  "tau": null,
+  "sigma2": null,
+  "eta_Z": null,
+  "delta": 1e-06,
+  "n_train": 25000
+ },
+ "steps": 1960,
+ "train_counts": [
+  13198,
+  11802
+ ],
+ "history": [
+  {
+   "epoch": 1,
+   "train_loss": 0.6794483070182801
+  },
+  {
+   "epoch": 2,
+   "train_loss": 0.6501164180374146
+  },
+  {
+   "epoch": 3,
+   "train_loss": 0.6232989995193482
+  },
+  {
+   "epoch": 4,
+   "train_loss": 0.5926124397659301
+  },
+  {
+   "epoch": 5,
+   "train_loss": 0.5631107587051392
+  },
+  {
+   "epoch": 6,
+   "train_loss": 0.540342818031311
+  },
+  {
+   "epoch": 7,
+   "train_loss": 0.5242608432006836
+  },
+  {
+   "epoch": 8,
+   "train_loss": 0.5125271326828003
+  },
+  {
+   "epoch": 9,
+   "train_loss": 0.5031753652000427
+  },
+  {
+   "epoch": 10,
+   "train_loss": 0.49532721170425414
+  },
+  {
+   "epoch": 11,
+   "train_loss": 0.4885801209640503
+  },
+  {
+   "epoch": 12,
+   "train_loss": 0.48280254812240603
+  },
+  {
+   "epoch": 13,
+   "train_loss": 0.4778167542076111
+  },
+  {
+   "epoch": 14,
+   "train_loss": 0.47351137444496155
+  },
+  {
+   "epoch": 15,
+   "train_loss": 0.46974531284332277
+  },
+  {
+   "epoch": 16,
+   "train_loss": 0.46648462436676025
+  },
+  {
+   "epoch": 17,
+   "train_loss": 0.4635282403755188
+  },
+  {
+   "epoch": 18,
+   "train_loss": 0.460916183052063
+  },
+  {
+   "epoch": 19,
+   "train_loss": 0.4585354876327515
+  },
+  {
+   "epoch": 20,
+   "train_loss": 0.45639180227279663
+  }
+ ],
+ "privacy": null,
+ "final_Z": null,
+ "evaluation": {
+  "overall": {
+   "n": 39133,
+   "accuracy": 0.7850152254104614,
+   "loss": 0.4543412923812866,
+   "tn": 19189,
+   "fp": 3888,
+   "fn": 4525,
+   "tp": 11531,
+   "fnr": 0.2818261086198306,
+   "fpr": 0.168479438401872,
+   "tpr": 0.7181738913801694
+  },
+  "groups": {
+   "Male": {
+    "n": 20674,
+    "accuracy": 0.7800619006156921,
+    "loss": 0.4632464051246643,
+    "tn": 8846,
+    "fp": 2244,
+    "fn": 2303,
+    "tp": 7281,
+    "fnr": 0.24029632721202004,
+    "fpr": 0.20234445446348062,
+    "tpr": 0.75970367278798
+   },
+   "Female": {
+    "n": 18459,
+    "accuracy": 0.7905628681182861,
+    "loss": 0.4443676173686981,
+    "tn": 10343,
+    "fp": 1644,
+    "fn": 2222,
+    "tp": 4250,
+    "fnr": 0.34332509270704575,
+    "fpr": 0.13714857762576124,
+    "tpr": 0.6566749072929543
+   }
+  }
+ },
+ "provenance": {
+  "python": "3.12.15",
+  "torch": "2.11.0+cu128",
+  "opacus": "1.6.0",
+  "cuda": "12.8",
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 5060 Ti",
+  "git_sha": "bb18e5160f736124572f1462428d0d629a08c86b",
+  "timestamp": "2026-11-12T10:10:48+00:00",
+  "elapsed_s": 2.2
+ }
+}

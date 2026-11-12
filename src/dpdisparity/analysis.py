@@ -27,16 +27,17 @@ def to_frame(results: list[dict]) -> pd.DataFrame:
 
 
 def run_info(results: list[dict]) -> pd.DataFrame:
-    """One row per method: ε (δ), final Z, number of seeds, source."""
+    """One row per method: ε (δ), σ, final Z, number of seeds, source."""
     df = pd.DataFrame([{"method": r["method"], "epsilon": (r["privacy"] or {}).get("epsilon"),
-                        "delta": (r["privacy"] or {}).get("delta"), "final_Z": r["final_Z"],
-                        "source": r["source"]} for r in results])
+                        "delta": (r["privacy"] or {}).get("delta"), "sigma": (r["privacy"] or {}).get("sigma"),
+                        "final_Z": r["final_Z"], "source": r["source"]} for r in results])
     out = df.groupby("method", sort=False).agg(seeds=("method", "size"), epsilon=("epsilon", "mean"),
-                                               delta=("delta", "first"), final_Z=("final_Z", "mean"),
-                                               source=("source", "first"))
+                                               delta=("delta", "first"), sigma=("sigma", "mean"),
+                                               final_Z=("final_Z", "mean"), source=("source", "first"))
     out = out.reindex(METHODS).rename(index=METHOD_LABELS)
-    out = out.assign(epsilon=out.epsilon.round(3), final_Z=out.final_Z.round(2),
+    out = out.assign(epsilon=out.epsilon.round(3), sigma=out.sigma.round(3), final_Z=out.final_Z.round(2),
                      delta=out.delta.map(lambda d: f"{d:.0e}" if pd.notna(d) else d))
+    out = out.dropna(axis=1, how="all")  # σ is recorded only by this repo's runs (solved per run on Folktables)
     return out.astype(object).where(out.notna(), "–")
 
 
@@ -102,7 +103,10 @@ def settings_table(dataset: str) -> pd.DataFrame:
     rows = {METHOD_LABELS[m]: preset(dataset, m).asdict() for m in METHODS}
     out = pd.DataFrame(rows).T.drop(columns=["dataset", "method"])
     out["delta"] = out["delta"].map(lambda d: f"{d:.0e}")
-    return out.rename(columns={"sigma": "σ", "sigma2": "σ₂", "tau": "τ", "eta_Z": "η_Z", "Z0": "Z₀", "delta": "δ"}).fillna("")
+    if "target_epsilon" in out:  # Folktables: σ is solved per run for the target ε
+        out.loc[out.target_epsilon.notna(), "sigma"] = "solved"
+    return out.rename(columns={"sigma": "σ", "sigma2": "σ₂", "tau": "τ", "eta_Z": "η_Z", "Z0": "Z₀", "delta": "δ",
+                               "target_epsilon": "target ε"}).fillna("")
 
 
 def headline(results: list[dict], dataset: str) -> pd.Series:
@@ -115,3 +119,54 @@ def headline(results: list[dict], dataset: str) -> pd.Series:
     out |= {f"{METHOD_LABELS[m]}: gap": gap.loc[m, "gap"] for m in gap.index}
     out |= {f"{METHOD_LABELS[m]}: ε": float(info.loc[METHOD_LABELS[m], "epsilon"]) for m in METHODS[1:]}
     return pd.Series(out).round(2)
+
+
+def gaps_by_setting(settings: dict) -> pd.DataFrame:
+    """{name: (results, dataset)} -> [method, group=name, mean, se] of the privacy-cost gap, for plots.group_bars."""
+    out = pd.concat({name: gaps(to_frame(r), ds) for name, (r, ds) in settings.items()}, names=["group", "method"])
+    return out.reset_index().rename(columns={"gap": "mean"})
+
+
+def size_sweep(runs_by_n: dict, dataset: str, key: str = "n_train") -> dict[str, pd.DataFrame]:
+    """{n: results} -> per training-set size, mean ± SE over seeds of the privacy-cost gap ("gap"),
+    and per method and group of π ("pi"), accuracy and FNR. Each table has a `key` column
+    (pass key="epsilon" for {ε: results})."""
+    def cat(f):
+        return pd.concat({n: f(to_frame(r)) for n, r in runs_by_n.items()}, names=[key, None]).reset_index(level=0)
+    return {"gap": cat(lambda df: gaps(df, dataset).reset_index().rename(columns={"gap": "mean"})),
+            "pi": cat(lambda df: summarize(privacy_costs(df), "pi")),
+            "accuracy": cat(lambda df: summarize(df, "accuracy")),
+            "fnr": cat(lambda df: summarize(df, "fnr"))}
+
+
+def base_rates(results: list[dict], dataset: str) -> pd.DataFrame:
+    """Per group (means over seeds, %): the base rate, the accuracy of always predicting the negative class,
+    the non-private model's headroom above that constant, and DP-SGD's accuracy, FNR and π.
+    Tests our Adult observation that DP-SGD's π roughly equals that headroom (it falls back to the constant)."""
+    df = to_frame(results)
+    df = df.assign(base_rate=100 * (df.fn + df.tp) / df.n)
+    mean = df.groupby(["method", "group"])[["accuracy", "fnr", "base_rate"]].mean()
+    pi = privacy_costs(df).groupby(["method", "group"]).pi.mean()
+    rows = {}
+    for g in GROUPS[dataset]:
+        npriv, dp = mean.loc[("nonprivate", g)], mean.loc[("dpsgd", g)]
+        const = 100 - npriv.base_rate
+        rows[g] = {"share positive": npriv.base_rate, "constant accuracy": const,
+                   "non-private accuracy": npriv.accuracy, "headroom": npriv.accuracy - const,
+                   "DP-SGD accuracy": dp.accuracy, "DP-SGD FNR": dp.fnr, "DP-SGD π": pi[("dpsgd", g)]}
+    return pd.DataFrame(rows).T.round(1)
+
+
+def setting_summary(settings: dict) -> pd.DataFrame:
+    """{name: (results, dataset)} -> one row per setting: non-private accuracy per group, the privacy-cost gap
+    (mean ± SE) per private method and Global-Adapt's π per group, in pp. Used to compare non-private baselines."""
+    rows = {}
+    for name, (results, dataset) in settings.items():
+        df, (a, b) = to_frame(results), GROUPS[dataset]
+        acc = df[df.method == "nonprivate"].groupby("group").accuracy.mean()
+        pi = privacy_costs(df).groupby(["method", "group"]).pi.mean()
+        g = gaps(df, dataset)
+        rows[name] = {"groups": f"{a} / {b}", "non-private acc": f"{acc[a]:.1f} / {acc[b]:.1f}"} \
+            | {f"{METHOD_LABELS[m]} gap": _fmt(g.loc[m, "gap"], g.loc[m, "se"], 2) for m in g.index} \
+            | {"Global-Adapt π": " / ".join(f"{round(pi[('global_adapt', k)], 1) + 0.0:.1f}" for k in (a, b))}  # + 0.0: no "-0.0"
+    return pd.DataFrame(rows).T

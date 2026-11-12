@@ -42,9 +42,15 @@ dpsgd-subgroup-disparity/
 ├── notebooks/                 # one notebook per site page; only call the package
 ├── scripts/                   # CLI for multi-seed runs
 ├── results/
-│   ├── legacy/                # frozen dp-testing outputs (shown by default)
-│   └── adult/                 # reruns from this repo
+│   ├── legacy/                # frozen dp-testing outputs (shown by default on MNIST/Adult)
+│   ├── mnist/  adult/         # reruns from this repo
+│   └── folktables/            # this repo's Folktables runs: {sex,race}/[balanced|n<N>|n25000_eps<E>|..._lr0.2]/
 ├── theme/                     # site styles (light / dark)
 ├── tests/                     # pytest checks
 └── data/                      # raw dataset downloads (gitignored)
 ```
+
+## TODOs
+
+- Get live site running
+- Folktables size sweep at a fixed number of training steps, to separate data size from training length, and be able to make the claim that disparity scales down with input size

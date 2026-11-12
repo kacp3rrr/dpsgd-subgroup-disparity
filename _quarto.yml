@@ -16,6 +16,8 @@ website:
         text: MNIST
       - href: notebooks/02_adult_subgroup_disparity.ipynb
         text: Adult
+      - href: notebooks/05_folktables.ipynb
+        text: Folktables
       - href: about.qmd
         text: About
   page-navigation: true

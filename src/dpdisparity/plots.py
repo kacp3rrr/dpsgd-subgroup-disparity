@@ -58,22 +58,52 @@ def group_bars(summary, groups, ylabel, title=None, label_groups=(), group_names
 
 
 def gap_bars(gaps, dataset, ax=None):
-    """Privacy-cost gap per private method: ours (solid) vs Esipova et al. (hatched)."""
+    """Privacy-cost gap per private method: ours (solid) vs Esipova et al. (hatched), if the paper has a target."""
     a, b = GROUPS[dataset]
     methods = list(gaps.index)
     ax = ax or plt.subplots(figsize=(4.6, 3.2))[1]
     x, width = np.arange(len(methods)), 0.38
+    has_paper = dataset in PAPER
+    shift = width / 2 if has_paper else 0
     for i, m in enumerate(methods):
         ours, ours_se = gaps.loc[m, "gap"], gaps.loc[m, "se"]
-        paper, paper_se = PAPER[dataset][m]["gap"]
-        _bars(ax, x[i] - width / 2, [ours], [ours_se], COLORS[m], width)
-        ax.bar(x[i] + width / 2, paper, width, yerr=paper_se, facecolor=COLORS[m] + "40", edgecolor=COLORS[m],
-               hatch="///", linewidth=1, error_kw={"ecolor": INK_2, "elinewidth": 1, "capsize": 2})
-        _label(ax, x[i] - width / 2, ours, ours_se)
-        _label(ax, x[i] + width / 2, paper, paper_se)
+        _bars(ax, x[i] - shift, [ours], [ours_se], COLORS[m], width)
+        _label(ax, x[i] - shift, ours, ours_se)
+        if has_paper:
+            paper, paper_se = PAPER[dataset][m]["gap"]
+            ax.bar(x[i] + width / 2, paper, width, yerr=paper_se, facecolor=COLORS[m] + "40", edgecolor=COLORS[m],
+                   hatch="///", linewidth=1, error_kw={"ecolor": INK_2, "elinewidth": 1, "capsize": 2})
+            _label(ax, x[i] + width / 2, paper, paper_se)
     ax.set_xticks(x, [METHOD_LABELS[m] for m in methods])
     ax.set_ylabel(f"Privacy-cost gap  |π$_{{{a}}}$ − π$_{{{b}}}$|  (pp)")
-    ax.legend(handles=[Patch(facecolor=INK_2, label="Ours"),
+    if has_paper:
+        ax.legend(handles=[Patch(facecolor=INK_2, label="Ours"),
                        Patch(facecolor=INK_2 + "40", edgecolor=INK_2, hatch="///", label=PAPER[dataset]["source"])],
-              loc="upper right", fontsize=8, handlelength=1.4)
+                  loc="upper right", fontsize=8, handlelength=1.4)
+    return ax
+
+
+def vs_n(tbl, ylabel, y="mean", x="n_train", xlabel="Training-set size n (log scale)", title=None, ax=None):
+    """Lines over training-set size n (or another sweep column `x`; log x), mean ± SE: one colour per method,
+    and a line style per group when `tbl` has a `group` column. `tbl` is one of analysis.size_sweep's tables."""
+    ax = ax or plt.subplots(figsize=(6, 3.4))[1]
+    groups = list(dict.fromkeys(tbl["group"])) if "group" in tbl else [None]
+    styles = dict(zip(groups, [("-", "o"), ("--", "s"), (":", "^")]))
+    for m in [m for m in METHODS if m in set(tbl.method)]:
+        for g in groups:
+            t = tbl[(tbl.method == m) & ((tbl.group == g) if g is not None else True)].sort_values(x)
+            ls, marker = styles[g]
+            label = METHOD_LABELS[m] + (f" · {g}" if g is not None else "")
+            ax.errorbar(t[x], t[y], yerr=t.se, color=COLORS[m], linestyle=ls, marker=marker, markersize=4,
+                        linewidth=1.5, elinewidth=1, ecolor=INK_2, capsize=2, label=label)
+    ns = sorted(set(tbl[x]))
+    ax.set_xscale("log")
+    ax.set_xticks(ns, [f"{n / 1000:.0f}k" if x == "n_train" else f"{n:g}" for n in ns])
+    ax.minorticks_off()
+    ax.axhline(0, color=INK_2, linewidth=0.8)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    if title:
+        ax.set_title(title)
+    ax.legend(loc="best", fontsize=8, handlelength=2.2)
     return ax

@@ -1,6 +1,6 @@
 """Paper hyperparameters (Esipova et al., 2023, App. B) and published reference numbers."""
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -25,9 +25,16 @@ class RunCfg:
     sigma2: float | None = None  # Global-Adapt: noise multiplier of the private count
     eta_Z: float | None = None   # Global-Adapt: learning rate of Z
     delta: float = 1e-6
+    target_epsilon: float | None = None  # if set, sigma is solved per run to reach this ε (SPEC §10)
+    balance: bool | None = None          # Folktables: subsample the groups to equal size, as on Adult
+    n_train: int | None = None           # Folktables: stratified training subsample; the test set is unchanged
 
     def asdict(self) -> dict:
-        return asdict(self)
+        # The Folktables-only fields are left out when unset, so existing MNIST/Adult result configs still match.
+        return {k: v for k, v in asdict(self).items() if v is not None or k not in OPTIONAL_FIELDS}
+
+
+OPTIONAL_FIELDS = ("target_epsilon", "balance", "n_train")
 
 
 PRESETS = {
@@ -41,13 +48,21 @@ PRESETS = {
                                       Z0=50.0, tau=1.0, sigma2=10.0, eta_Z=0.1),
 }
 
+# Folktables ACSIncome: the Adult presets, but at a fixed ε = 3.41 (Adult's) with σ solved for each run's
+# sampling rate, so runs of different size are comparable (SPEC §10).
+FOLKTABLES_EPSILON = 3.41
+PRESETS |= {(ds, m): replace(PRESETS[("adult", m)], dataset=ds,
+                             **({} if m == "nonprivate" else {"sigma": None, "target_epsilon": FOLKTABLES_EPSILON}))
+            for ds in ("folktables_sex", "folktables_race") for m in METHODS}
+
 
 def preset(dataset: str, method: str) -> RunCfg:
     return PRESETS[(dataset, method)]
 
 
 # The two groups compared on each dataset, in the paper's column order.
-GROUPS = {"mnist": ("2", "8"), "adult": ("Male", "Female")}
+GROUPS = {"mnist": ("2", "8"), "adult": ("Male", "Female"),
+          "folktables_sex": ("Male", "Female"), "folktables_race": ("White", "Black")}
 
 # Published numbers, mean ± standard error over 5 seeds, in percentage points.
 PAPER = {
