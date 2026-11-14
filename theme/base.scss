@@ -53,3 +53,11 @@ details.code-fold > summary { font-size: 0.82rem; color: #6b7280; }
 tbody th { background: transparent !important; text-align: left; font-weight: 500; }
 
 :not(pre) > code { color: $primary; background: transparent; padding: 0; }
+
+// Home page result cards: one figure shape and no figure captions, so the three cards line up.
+// (The bar charts' legends label ours vs Esipova et al.; the card text labels Folktables as ours.)
+.result-cards {
+  .quarto-float img { aspect-ratio: 23 / 16; object-fit: contain; width: 100%; }
+  figcaption { display: none; }
+  h3 { margin-top: 0; }
+}

@@ -22,7 +22,7 @@ website:
         text: About
   page-navigation: true
   page-footer:
-    center: "Reproduction and Expansion of Esipova et al. (ICLR 2023) · Hunter College, Big Data Analytics"
+    center: "Reproduction and Expansion of Esipova et al. (ICLR 2023) · By Kacper Lisowicz, Yunzhe Zheng, and Daniel Lin"
 
 execute:
   enabled: false   # notebooks render from committed outputs; no GPU needed to build the site

@@ -1,6 +1,7 @@
 ---
 title: "DPSGD Subgroup Disparity"
 subtitle: "Analyzing Differentially Private Stochastic Gradient Descent (DPSGD) Under Class Imbalance and Subgroup Disparity"
+author: "Kacper Lisowicz, Yunzhe Zheng, Daniel Lin"
 ---
 
 Training a model with **differential privacy** (DP) guarantees that no single person's record changes the model much. The standard method, **DP-SGD**, does this by capping each example's influence (*clipping*) and adding random *noise*. The guarantee is defined **per record**, but the cost in accuracy is felt **per group**. Overall accuracy can hide that a few groups pay most of it.
@@ -12,62 +13,54 @@ This project reproduces and analyses Esipova et al., *Disparate Impact in Differ
 
 ## How we measure it
 
-For each group *k*, the **privacy cost** is π_k = accuracy without privacy − accuracy with privacy, in percentage points. The **privacy-cost gap** |π_a − π_b| is how much more one group pays than the other. The gap is not the plain accuracy difference, because groups can differ in accuracy before any privacy is added.
+For each group $k$, the **privacy cost** is $\pi_k$ = accuracy without privacy − accuracy with privacy, in percentage points. The **privacy-cost gap** $\lvert \pi_a - \pi_b \rvert$ is how much more one group pays than the other. The gap is not the plain accuracy difference, because groups can differ in accuracy before any privacy is added.
 
-## Results so far
+## Results
 
-::: {.grid}
+::: {.grid .result-cards}
 ::: {.g-col-12 .g-col-md-6}
-### [MNIST: class imbalance](notebooks/01_mnist_class_imbalance.html)
+### [MNIST: Class Imbalance](notebooks/01_mnist_class_imbalance.html)
 {{< embed notebooks/01_mnist_class_imbalance.ipynb#fig-mnist-gap >}}
 
-We make the digit 8 rare on purpose (~1% of training data):
+The digit 8 is made rare on purpose (~1% of training data).
 
-- **DP-SGD:** the 8 loses about **61 points** of accuracy and the 2 about **9**.
-- **Global-Adapt:** **shrinks** that gap from about 53 to about 13 points, but does not close it.
+- **DP-SGD:** the 8 loses about **61 points** of accuracy, the 2 about **9**.
+- **Global-Adapt:** **shrinks** the gap from about 53 to about 13 points, but does not close it.
 :::
 
 ::: {.g-col-12 .g-col-md-6}
-### [Adult: subgroup disparity](notebooks/02_adult_subgroup_disparity.html)
+### [Adult: Subgroup Disparity](notebooks/02_adult_subgroup_disparity.html)
 {{< embed notebooks/02_adult_subgroup_disparity.ipynb#fig-adult-gap >}}
 
-Census income prediction with men and women balanced to equal size:
+Census income prediction, with men and women balanced to equal size.
 
-- **DP-SGD:** costs the harder group (men) about **11 points** and women about **4**.
+- **DP-SGD:** costs the harder group (men) about **11 points**, women about **4**.
 - **Global-Adapt:** **nearly closes** the gap (about 0.1 ± 0.2 points).
 :::
-:::
 
-Both tracks **closely track** the paper's published numbers. Hatched bars are Esipova et al.'s values; solid bars are ours.
-
-### [Folktables: the same question at census scale](notebooks/05_folktables.html)
-
-::: {.grid}
-::: {.g-col-12 .g-col-md-7}
+::: {.g-col-12 .g-col-md-6 .g-start-md-4}
+### [Folktables: Census-Scale Subgroup Disparity](notebooks/05_folktables.html)
 {{< embed notebooks/05_folktables.ipynb#fig-folk-sweep >}}
-:::
 
-::: {.g-col-12 .g-col-md-5}
-Income prediction on 2018 California census data (ACSIncome, 195,665 people). The privacy budget is fixed (ε = 3.41) and only the amount of training data changes. All numbers are ours; no published DP-SGD result exists for this data, so this is an extension, not a reproduction.
+2018 California census data (195,665 people) at a fixed $\varepsilon = 3.41$, varying training-set size.
 
-- **Small data:** with 5,000–10,000 training examples, DP-SGD costs men about **10 points** more than women. It falls back to almost always predicting "≤ $50K", as on Adult.
-- **Large data:** from 50,000 on, the gap is under **1 point**. On all of California it is about **0.1**, or 0.4 against a better-trained non-private baseline.
-- **Global-Adapt** keeps the gap at or below about **0.6 points** at every size.
-- **Clipping, not noise:** at a fixed size, the gap barely changes between ε = 0.5 and 8, and removing the noise entirely changes accuracy very little. Because every run trains for 20 epochs, data size and training length grow together in this sweep.
+- **DP-SGD:** costs men about **10 points** more than women at 5–10k examples, under **1 point** from 50k on.
+- **Global-Adapt:** keeps the gap at or below about **0.6 points** at every size.
 :::
 :::
 
-## Why it happens: the proposed mechanism
+MNIST and Adult **closely track** the paper's published numbers (hatched bars: Esipova et al.; solid: ours). Folktables has no published DP-SGD target: all its numbers are ours, and it is an extension, not a reproduction.
+
+## Why it Happens
 
 - **Large gradients get clipped most.** Examples the model fits poorly produce large gradients, and clipping shrinks those the most.
 - **Clipping changes direction, not just size.** That tilts each update toward the well-fit majority. Esipova et al. call this **gradient misalignment**.
 - **The bias accumulates.** The noise is random and largely averages out over training; the clipping bias is systematic.
 - **Global-Adapt's fix:** it scales *all* gradients by one shared factor, which preserves their relative sizes and the update's direction. It never uses group labels.
 
-Our results so far are *consistent with* this explanation. Testing it directly is the next step. On Folktables, the large gaps appear when DP-SGD falls back to the majority answer, which happens with small training sets.
+Our results so far are *consistent with* this explanation. Testing it directly is the next step. On Folktables, the large gaps appear when DP-SGD falls back to the majority answer, which happens with small training sets. There, the cost comes almost entirely from clipping rather than noise: the gap barely changes between $\varepsilon = 0.5$ and 8. Because every run trains for 20 epochs, data size and training length also grow together in that sweep.
 
-## What's next
-
-- **Mechanism experiments:** per-group clipping and gradient angles.
-- **Smaller checks:** Adult at its natural sex ratio, and a matched-learning-rate check of Global-Adapt vs DP-SGD. On Folktables, the non-private baseline has already been checked at Global-Adapt's learning rate; the gap conclusions hold.
-- **Folktables follow-up:** a size sweep at a fixed number of training steps, to separate data size from training length.
+## Next Steps
+- Mechanism experiments with per-group clipping and gradient angles.
+- Smaller checks: Adult at its natural sex ratio, and a matched-learning-rate check of Global-Adapt vs DP-SGD. On Folktables, the non-private baseline has already been checked at Global-Adapt's learning rate; the gap conclusions hold.
+- Folktables follow-up, with a size sweep at a fixed number of training steps, to separate data size from training length.

@@ -83,10 +83,11 @@ def gap_bars(gaps, dataset, ax=None):
     return ax
 
 
-def vs_n(tbl, ylabel, y="mean", x="n_train", xlabel="Training-set size n (log scale)", title=None, ax=None):
+def vs_n(tbl, ylabel, y="mean", x="n_train", xlabel="Training-set size n (log scale)", title=None, ax=None,
+         figsize=(6, 3.4)):
     """Lines over training-set size n (or another sweep column `x`; log x), mean ± SE: one colour per method,
     and a line style per group when `tbl` has a `group` column. `tbl` is one of analysis.size_sweep's tables."""
-    ax = ax or plt.subplots(figsize=(6, 3.4))[1]
+    ax = ax or plt.subplots(figsize=figsize)[1]
     groups = list(dict.fromkeys(tbl["group"])) if "group" in tbl else [None]
     styles = dict(zip(groups, [("-", "o"), ("--", "s"), (":", "^")]))
     for m in [m for m in METHODS if m in set(tbl.method)]:

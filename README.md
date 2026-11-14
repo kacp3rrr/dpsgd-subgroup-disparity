@@ -1,6 +1,6 @@
 # DPSGD Subgroup Disparity
 
-Reproduction and analysis of disparate impact in DP-SGD (Esipova et al., ICLR 2023). 
+Analysis of disparate impact in Differentially-Private Stochastic Gradient Descent (DPSGD).
 
 ## Setup
 

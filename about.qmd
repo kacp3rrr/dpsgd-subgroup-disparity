@@ -12,17 +12,17 @@ A reproduction-plus-analysis study by Kacper Lisowicz, Yunzhe Zheng and Daniel L
   - Adult and MNIST have also been retrained with this repository's pipeline; their pages compare the two.
   - Folktables results are this repository's own (`results/folktables/`); there are no earlier runs.
 - **To retrain a dataset:** `uv run python scripts/sweep.py --dataset adult` (or `mnist`; use a GPU for MNIST and Folktables).
-  - Folktables: `--dataset folktables_sex` (natural sex ratio), `--dataset folktables_sex --balance`, `--dataset folktables_sex --n-train 5000 10000 25000 50000 100000` (size sweep), `--dataset folktables_race`, the ε sweep `--dataset folktables_sex --n-train 25000 --methods dpsgd global_adapt --target-epsilon 0.5 1 2 8`, and the matched-learning-rate non-private baseline `--methods nonprivate --lr 0.2` (add the same `--n-train` / `--balance` / dataset options). Runs at a non-preset learning rate are stored separately (`..._lr0.2/`).
+  - Folktables: `--dataset folktables_sex` (natural sex ratio), `--dataset folktables_sex --balance`, `--dataset folktables_sex --n-train 5000 10000 25000 50000 100000` (size sweep), `--dataset folktables_race`, the $\varepsilon$ sweep `--dataset folktables_sex --n-train 25000 --methods dpsgd global_adapt --target-epsilon 0.5 1 2 8`, and the matched-learning-rate non-private baseline `--methods nonprivate --lr 0.2` (add the same `--n-train` / `--balance` / dataset options). Runs at a non-preset learning rate are stored separately (`..._lr0.2/`).
 - **Folktables data:** the 2018 1-Year American Community Survey (ACS) Public Use Microdata Sample, California person file, from the US Census Bureau.
   - The [`folktables`](https://github.com/socialfoundations/folktables) package (Ding et al., 2021) downloads it from census.gov into `data/folktables/` (about 255 MB). Its SHA-256 is pinned in the loader.
-  - Task: **ACSIncome**, income > $50K from 10 features (age, class of worker, education, marital status, occupation, place of birth, relationship, hours worked, sex, race), on employed adults (age > 16, income > $100, hours > 0). California has 195,665 such people.
+  - Task: **ACSIncome**, income > \$50K from 10 features (age, class of worker, education, marital status, occupation, place of birth, relationship, hours worked, sex, race), on employed adults (age > 16, income > \$100, hours > 0). California has 195,665 such people.
   - Preprocessing follows our Adult pipeline: age and hours standardized, the other categoricals one-hot encoded (815 inputs; 805 for the white/Black subset), sex kept as an input, 80/20 seeded split.
-- **Folktables privacy:** ε is fixed at 3.41 (Adult's) and the noise multiplier σ is solved for each run's sampling rate with Opacus's `get_noise_multiplier`, so runs of different sizes get the same guarantee. The solved σ is stored with each result.
+- **Folktables privacy:** $\varepsilon$ is fixed at 3.41 (Adult's) and the noise multiplier $\sigma$ is solved for each run's sampling rate with Opacus's `get_noise_multiplier`, so runs of different sizes get the same guarantee. The solved $\sigma$ is stored with each result.
 - **Hardware:** the MNIST rerun and all Folktables runs used an NVIDIA RTX 5060 Ti (CUDA 12.8, PyTorch 2.11, Opacus 1.6); exact versions are stored in every result file.
 - **Hyperparameters:** Esipova et al. (2023), App. B.
-- **Privacy:** Poisson sampling, RDP accountant, δ = 10⁻⁶. Global-Adapt's private count is included in ε.
-- **Statistics:** values are means over 5 seeds ± standard error (SE = SD/√5), matching the paper's convention.
-- **The disparity measure** is the privacy-cost gap |mean(π_a − π_b)|. It is not the raw accuracy gap.
+- **Privacy:** Poisson sampling, RDP accountant, $\delta = 10^{-6}$. Global-Adapt's private count is included in $\varepsilon$.
+- **Statistics:** values are means over 5 seeds ± standard error ($\text{SE} = \text{SD}/\sqrt{5}$), matching the paper's convention.
+- **The disparity measure** is the privacy-cost gap $\lvert \operatorname{mean}(\pi_a - \pi_b) \rvert$. It is not the raw accuracy gap.
 
 ## Literature
 
