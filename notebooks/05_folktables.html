@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Folktables: the same question at census scale – DPSGD Subgroup Disparity</title>
+<title>Subgroup Disparity at the Census Scale with Folktables – DPSGD Subgroup Disparity</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -83,9 +83,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-49c787a6c175d90e42264fbd7996148e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-a4fdfacc8dc0ea4efabeda844be85da3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-02ee83c8e965b42b6835df4eefa17818.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-a4fdfacc8dc0ea4efabeda844be85da3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-4c4db7503122e6cface8f2e9b38c952b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-f3844c3a88c312ca498d4ff1b77b307c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-4c4db7503122e6cface8f2e9b38c952b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -118,6 +118,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -372,8 +401,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Folktables: the same question at census scale</h1>
-<p class="subtitle lead">Do the patterns we saw on Adult hold on 195,000 Californians, and does more data make privacy’s cost fairer?</p>
+<h1 class="title">Subgroup Disparity at the Census Scale with Folktables</h1>
+<p class="subtitle lead">Do the patterns seen on the UCI Adult dataset hold on 195,000 Californians, and does more data make privacy’s cost fairer?</p>
 </div>
 
 
@@ -413,12 +442,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>Experiments</strong> (SPEC §10):
 <ul>
 <li><strong>F1, sex on all of California:</strong> balanced like Adult (about 74k per sex in training) and at the natural ratio (53% men).</li>
-<li><strong>F2, size sweep:</strong> n = 5k, 10k, 25k, 50k, 100k and all 156,532, at the natural ratio. Subsamples are stratified by sex and drawn from the training split, so the test set is fixed across n.</li>
+<li><strong>F2, size sweep:</strong> <span class="math inline">\(n\)</span> = 5k, 10k, 25k, 50k, 100k and all 156,532, at the natural ratio. Subsamples are stratified by sex and drawn from the training split, so the test set is fixed across <span class="math inline">\(n\)</span>.</li>
 <li><strong>F3, race:</strong> white vs Black, natural ratio. Black Californians are 6.6% of this subset, and other races are excluded.</li>
-<li><strong>F4, ε sweep:</strong> ε from 0.5 to 8 at n = 25k.</li>
+<li><strong>F4, <span class="math inline">\(\varepsilon\)</span> sweep:</strong> <span class="math inline">\(\varepsilon\)</span> from 0.5 to 8 at <span class="math inline">\(n\)</span> = 25k.</li>
 </ul></li>
-<li><strong>Model and training: Adult’s presets.</strong> An MLP with two hidden layers of 256 and tanh, 20 epochs, Poisson batches of 256, δ = 10⁻⁶. The learning rates, C and the Global-Adapt settings are Adult’s.</li>
-<li><strong>One change: ε is fixed at 3.41 (Adult’s) and σ is solved per run</strong> with Opacus’s <code>get_noise_multiplier</code>. σ ranges from 1.71 at 5k to 0.70 on all of California. A fixed σ would give a smaller ε on more data, making sizes incomparable. Global-Adapt uses the same σ; its private count adds a little ε.</li>
+<li><strong>Model and training: Adult’s presets.</strong> An MLP with two hidden layers of 256 and tanh, 20 epochs, Poisson batches of 256, <span class="math inline">\(\delta = 10^{-6}\)</span>. The learning rates, <span class="math inline">\(C\)</span> and the Global-Adapt settings are Adult’s.</li>
+<li><strong>One change: <span class="math inline">\(\varepsilon\)</span> is fixed at 3.41 (Adult’s) and <span class="math inline">\(\sigma\)</span> is solved per run</strong> with Opacus’s <code>get_noise_multiplier</code>. <span class="math inline">\(\sigma\)</span> ranges from 1.71 at 5k to 0.70 on all of California. A fixed <span class="math inline">\(\sigma\)</span> would give a smaller <span class="math inline">\(\varepsilon\)</span> on more data, making sizes incomparable. Global-Adapt uses the same <span class="math inline">\(\sigma\)</span>; its private count adds a little <span class="math inline">\(\varepsilon\)</span>.</li>
 <li><strong>Baseline check:</strong> the non-private model is also trained at Global-Adapt’s lr 0.2 in every setting, to test how much the privacy costs depend on the baseline.</li>
 <li><strong>Seeds:</strong> 0–4. Within a seed, all methods share the split and the initial weights, and the subsamples are nested (5k ⊂ 10k ⊂ …).</li>
 </ul>
@@ -428,7 +457,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Education is one-hot only, as ACSIncome has no <code>education_num</code>.</li>
 <li>One-hot encoding runs before balancing, so every variant has the same inputs.</li>
 </ul>
-<div id="481ed7d4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:51.054679Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:51.054601Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:52.872930Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:52.872331Z&quot;}}" data-execution_count="1">
+<div id="481ed7d4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:45.995382Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:45.995275Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:48.964052Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:48.963543Z&quot;}}" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -437,15 +466,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>SOURCE <span class="op">=</span> <span class="st">"rerun"</span>  <span class="co"># Folktables has no dp-testing runs: this loads this repo's results (and trains any that are missing)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:52.874411Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:52.874262Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:52.880813Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:52.880376Z&quot;}}" data-execution_count="2">
+<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:48.965266Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:48.965136Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:48.971324Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:48.971026Z&quot;}}" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>A.settings_table(<span class="st">"folktables_sex"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-settings" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:52.874411Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:52.874262Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:52.880813Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:52.880376Z&quot;}}" data-execution_count="2">
+<div id="tbl-folk-settings" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:48.965266Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:48.965136Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:48.971324Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:48.971026Z&quot;}}" data-execution_count="2">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-settings-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1: Hyperparameters: Adult presets (Esipova et al., App. B), with ε fixed at 3.41 and σ solved per run.
+Table&nbsp;1: Hyperparameters: Adult presets (Esipova et al., App. B), with <span class="math inline">\(\varepsilon\)</span> fixed at 3.41 and <span class="math inline">\(\sigma\)</span> solved per run.
 </figcaption>
 <div aria-describedby="tbl-folk-settings-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -521,7 +550,7 @@ Table&nbsp;1: Hyperparameters: Adult presets (Esipova et al., App. B), with ε f
 </figure>
 </div>
 </div>
-<div id="a9dd7222" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:52.881898Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:52.881824Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:52.896222Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:52.895864Z&quot;}}" data-execution_count="3">
+<div id="a9dd7222" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:48.972406Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:48.972331Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:48.987485Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:48.986843Z&quot;}}" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>bal <span class="op">=</span> runner.load(<span class="st">"folktables_sex"</span>, SOURCE, balance<span class="op">=</span><span class="va">True</span>)  <span class="co"># F1: sexes balanced, as on Adult</span></span>
@@ -539,14 +568,14 @@ Table&nbsp;1: Hyperparameters: Adult presets (Esipova et al., App. B), with ε f
 <section id="phase-1-non-private-baseline" class="level2">
 <h2 class="anchored" data-anchor-id="phase-1-non-private-baseline">Phase 1: Non-private baseline</h2>
 <p>Without privacy, accuracy is about 81% for men and 82% for women, against 81% and 92% on Adult, where “≤ $50K” was almost always right for women. <strong>Men are only about 1.5 points harder here, against 11.6 on Adult.</strong></p>
-<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:52.897342Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:52.897259Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:52.912614Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:52.912468Z&quot;}}" data-execution_count="4">
+<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:48.989466Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:48.989304Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.010548Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.009469Z&quot;}}" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> [<span class="st">"share positive"</span>, <span class="st">"constant accuracy"</span>, <span class="st">"non-private accuracy"</span>]</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pd.concat({<span class="st">"Adult (balanced)"</span>: A.base_rates(adult, <span class="st">"adult"</span>), <span class="st">"CA balanced"</span>: A.base_rates(bal, <span class="st">"folktables_sex"</span>),</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>           <span class="st">"CA natural ratio"</span>: A.base_rates(nat, <span class="st">"folktables_sex"</span>)})[cols]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-base" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:52.897342Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:52.897259Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:52.912614Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:52.912468Z&quot;}}" data-execution_count="4">
+<div id="tbl-folk-base" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:48.989466Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:48.989304Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.010548Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.009469Z&quot;}}" data-execution_count="4">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-base-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;2: Test set per sex (ours, %, mean over 5 seeds; Adult = our dp-testing runs): share &gt; $50K, accuracy of always predicting ≤ $50K, non-private accuracy.
@@ -618,8 +647,8 @@ Table&nbsp;2: Test set per sex (ours, %, mean over 5 seeds; Adult = our dp-testi
 </section>
 <section id="phase-2-dp-sgd" class="level2">
 <h2 class="anchored" data-anchor-id="phase-2-dp-sgd">Phase 2: DP-SGD</h2>
-<p>On all of California (balanced, σ ≈ 0.70), DP-SGD costs both sexes about the same, a little under 4 points each.</p>
-<div id="cell-fig-folk-dpsgd" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:52.914001Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:52.913934Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:52.979290Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:52.978820Z&quot;}}" data-execution_count="5">
+<p>On all of California (balanced, <span class="math inline">\(\sigma \approx 0.70\)</span>), DP-SGD costs both sexes about the same, a little under 4 points each.</p>
+<div id="cell-fig-folk-dpsgd" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.012136Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.012027Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.105681Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.105218Z&quot;}}" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>plots.group_bars(acc_bal[acc_bal.method <span class="op">!=</span> <span class="st">"global_adapt"</span>], SEXES, <span class="st">"Test accuracy (%)"</span>, label_groups<span class="op">=</span>SEXES)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -640,8 +669,8 @@ Figure&nbsp;1: Test accuracy by sex, CA balanced: non-private vs DP-SGD (ours; m
 </section>
 <section id="phase-3-disparity-evaluation" class="level2">
 <h2 class="anchored" data-anchor-id="phase-3-disparity-evaluation">Phase 3: Disparity evaluation</h2>
-<p>The privacy cost is π_k = A_k(non-private) − A_k(private), paired by seed. The disparity measure is the <strong>privacy-cost gap</strong> |π_Male − π_Female|.</p>
-<div id="cell-fig-folk-cost" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:52.980337Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:52.980258Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.038009Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.037566Z&quot;}}" data-execution_count="6">
+<p>The privacy cost is <span class="math inline">\(\pi_k = A_k(\text{non-private}) - A_k(\text{private})\)</span>, paired by seed. The disparity measure is the <strong>privacy-cost gap</strong> <span class="math inline">\(\lvert \pi_{\text{Male}} - \pi_{\text{Female}} \rvert\)</span>.</p>
+<div id="cell-fig-folk-cost" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.107011Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.106925Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.167506Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.167064Z&quot;}}" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>plots.group_bars(A.summarize(A.privacy_costs(df_bal), <span class="st">"pi"</span>), SEXES, <span class="st">"Privacy cost π (pp)"</span>, label_groups<span class="op">=</span>SEXES)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -662,7 +691,7 @@ Figure&nbsp;2: Privacy cost by sex, CA balanced (ours; pp lost vs non-private, m
 <section id="accuracy-still-hides-something" class="level3">
 <h3 class="anchored" data-anchor-id="accuracy-still-hides-something">Accuracy still hides something</h3>
 <p>At this size DP-SGD does <strong>not</strong> fall back to “always ≤ $50K”. Its false-negative rate stays far from 100. But the rise is uneven: DP-SGD misses about 7 more high-earning women per 100 than the non-private model (34 vs 27), and about 3 more men (22 vs 20). Against the stronger lr-0.2 baseline, the figures are about 11 and 4. The accuracy cost is equal, but the extra missed high earners fall more on women.</p>
-<div id="cell-fig-folk-fnr" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.039145Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.039058Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.100323Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.099866Z&quot;}}" data-execution_count="7">
+<div id="cell-fig-folk-fnr" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.168703Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.168621Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.231791Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.231621Z&quot;}}" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plots.group_bars(A.summarize(df_bal, <span class="st">"fnr"</span>), SEXES, <span class="st">"Missed high earners per 100"</span>, label_groups<span class="op">=</span>SEXES)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -684,8 +713,8 @@ Figure&nbsp;3: False-negative rate by sex, CA balanced: high earners missed per 
 </section>
 <section id="phase-4-dpsgd-global-adapt" class="level2">
 <h2 class="anchored" data-anchor-id="phase-4-dpsgd-global-adapt">Phase 4: DPSGD-Global-Adapt</h2>
-<p>Global-Adapt scales every gradient by the same factor C/Z instead of clipping large ones separately, and learns Z privately. It uses no group labels.</p>
-<div id="cell-fig-folk-acc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.101294Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.101221Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.161700Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.161183Z&quot;}}" data-execution_count="8">
+<p>Global-Adapt scales every gradient by the same factor <span class="math inline">\(C/Z\)</span> instead of clipping large ones separately, and learns <span class="math inline">\(Z\)</span> privately. It uses no group labels.</p>
+<div id="cell-fig-folk-acc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.233481Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.233405Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.294784Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.294620Z&quot;}}" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>plots.group_bars(acc_bal, SEXES, <span class="st">"Test accuracy (%)"</span>, label_groups<span class="op">=</span>SEXES)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -703,7 +732,7 @@ Figure&nbsp;4: Test accuracy by sex, CA balanced, all three methods (ours; mean 
 </div>
 </div>
 </div>
-<div id="cell-fig-folk-gap" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.162727Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.162645Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.234246Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.233650Z&quot;}}" data-execution_count="9">
+<div id="cell-fig-folk-gap" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.296473Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.296392Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.369823Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.369610Z&quot;}}" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>gap_settings <span class="op">=</span> A.gaps_by_setting({<span class="st">"Adult (balanced)"</span>: (adult, <span class="st">"adult"</span>), <span class="st">"CA balanced"</span>: (bal, <span class="st">"folktables_sex"</span>),</span>
@@ -718,7 +747,7 @@ Figure&nbsp;4: Test accuracy by sex, CA balanced, all three methods (ours; mean 
 <img src="05_folktables_files/figure-html/fig-folk-gap-output-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-folk-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: Privacy-cost gap |π_Male − π_Female|, Adult vs CA at both sex ratios, all at ε ≈ 3.41 (ours; mean ± SE).
+Figure&nbsp;5: Privacy-cost gap <span class="math inline">\(\lvert \pi_{\text{Male}} - \pi_{\text{Female}} \rvert\)</span>, Adult vs CA at both sex ratios, all at <span class="math inline">\(\varepsilon \approx 3.41\)</span> (ours; mean ± SE).
 </figcaption>
 </figure>
 </div>
@@ -729,14 +758,14 @@ Figure&nbsp;5: Privacy-cost gap |π_Male − π_Female|, Adult vs CA at both sex
 </section>
 <section id="comparison-with-adult" class="level2">
 <h2 class="anchored" data-anchor-id="comparison-with-adult">Comparison with Adult</h2>
-<p>With no published Folktables target, we compare with <strong>our</strong> Adult runs (the dp-testing runs on the <a href="../notebooks/02_adult_subgroup_disparity.html">Adult page</a>). ε is about 3.41 throughout, so gap sizes are comparable, unlike between MNIST and Adult.</p>
-<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.235335Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.235254Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.262369Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.262091Z&quot;}}" data-execution_count="10">
+<p>With no published Folktables target, we compare with <strong>our</strong> Adult runs (the dp-testing runs on the <a href="../notebooks/02_adult_subgroup_disparity.html">Adult page</a>). <span class="math inline">\(\varepsilon\)</span> is about 3.41 throughout, so gap sizes are comparable, unlike between MNIST and Adult.</p>
+<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.371205Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.371116Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.399351Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.399166Z&quot;}}" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"Adult (balanced)"</span>: A.headline(adult, <span class="st">"adult"</span>), <span class="st">"CA balanced"</span>: A.headline(bal, <span class="st">"folktables_sex"</span>),</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>              <span class="st">"CA natural ratio"</span>: A.headline(nat, <span class="st">"folktables_sex"</span>)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-vs-adult" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.235335Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.235254Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.262369Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.262091Z&quot;}}" data-execution_count="10">
+<div id="tbl-folk-vs-adult" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.371205Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.371116Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.399351Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.399166Z&quot;}}" data-execution_count="10">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-vs-adult-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;3: Key numbers (ours, mean over 5 seeds, %): Adult vs CA balanced vs CA natural ratio.
@@ -825,16 +854,16 @@ Table&nbsp;3: Key numbers (ours, mean over 5 seeds, %): Adult vs CA balanced vs 
 </figure>
 </div>
 </div>
-<p><strong>Adult’s result does not carry over to all of California:</strong> the gap is 7 points there and about 0.1 here, at the same ε. California has about 6× more training data and barely-harder men; the size sweep separates the two.</p>
+<p><strong>Adult’s result does not carry over to all of California:</strong> the gap is 7 points there and about 0.1 here, at the same <span class="math inline">\(\varepsilon\)</span>. California has about 6× more training data and barely-harder men; the size sweep separates the two.</p>
 </section>
 <section id="size-sweep-does-more-data-make-privacys-cost-fairer" class="level2">
 <h2 class="anchored" data-anchor-id="size-sweep-does-more-data-make-privacys-cost-fairer">Size sweep: does more data make privacy’s cost fairer?</h2>
 <p>The centrepiece: only the training-set size changes. 25k is about Adult’s training size.</p>
-<div id="cell-fig-folk-sweep" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.263420Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.263352Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.379223Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.378780Z&quot;}}" data-execution_count="11">
+<div id="cell-fig-folk-sweep" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.400536Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.400446Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.516662Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.516307Z&quot;}}" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>sw <span class="op">=</span> A.size_sweep(sweep, <span class="st">"folktables_sex"</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>plots.vs_n(sw[<span class="st">"gap"</span>], <span class="st">"Privacy-cost gap (pp)"</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>plots.vs_n(sw[<span class="st">"gap"</span>], <span class="st">"Privacy-cost gap (pp)"</span>, figsize<span class="op">=</span>(<span class="fl">4.6</span>, <span class="fl">3.2</span>))<span class="op">;</span>  <span class="co"># same size as the MNIST/Adult gap charts (home page)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-folk-sweep" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -843,13 +872,13 @@ Table&nbsp;3: Key numbers (ours, mean over 5 seeds, %): Adult vs CA balanced vs 
 <img src="05_folktables_files/figure-html/fig-folk-sweep-output-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-folk-sweep-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6: Privacy-cost gap |π_Male − π_Female| vs training-set size, CA natural ratio, ε = 3.41, same test set at every n (ours; mean ± SE).
+Figure&nbsp;6: Privacy-cost gap <span class="math inline">\(\lvert \pi_{\text{Male}} - \pi_{\text{Female}} \rvert\)</span> vs training-set size, CA natural ratio, <span class="math inline">\(\varepsilon = 3.41\)</span>, same test set at every <span class="math inline">\(n\)</span> (ours; mean ± SE).
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
-<div id="cell-fig-folk-sweep-pi" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.380094Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.380015Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.452563Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.452295Z&quot;}}" data-execution_count="12">
+<div id="cell-fig-folk-sweep-pi" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.518600Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.518506Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.596603Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.596282Z&quot;}}" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>plots.vs_n(sw[<span class="st">"pi"</span>], <span class="st">"Privacy cost π (pp)"</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -867,7 +896,7 @@ Figure&nbsp;7: Privacy cost per sex vs training-set size, against the lr-0.01 no
 </div>
 </div>
 </div>
-<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.453787Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.453703Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.478665Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.478325Z&quot;}}" data-execution_count="13">
+<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.597988Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.597915Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.622967Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.622798Z&quot;}}" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>info_n <span class="op">=</span> pd.concat({n: A.run_info(r) <span class="cf">for</span> n, r <span class="kw">in</span> sweep.items()}, names<span class="op">=</span>[<span class="st">"n_train"</span>, <span class="st">"method"</span>])</span>
@@ -875,10 +904,10 @@ Figure&nbsp;7: Privacy cost per sex vs training-set size, against the lr-0.01 no
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> gap_n[[<span class="st">"mean"</span>, <span class="st">"se"</span>]].<span class="bu">round</span>(<span class="dv">2</span>).join(info_n[[<span class="st">"sigma"</span>, <span class="st">"epsilon"</span>]])</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>out.rename(columns<span class="op">=</span>{<span class="st">"mean"</span>: <span class="st">"gap"</span>, <span class="st">"se"</span>: <span class="st">"SE"</span>, <span class="st">"sigma"</span>: <span class="st">"σ (solved)"</span>, <span class="st">"epsilon"</span>: <span class="st">"ε (achieved)"</span>}).rename_axis([<span class="st">"n"</span>, <span class="st">"Method"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-sweep" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.453787Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.453703Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.478665Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.478325Z&quot;}}" data-execution_count="13">
+<div id="tbl-folk-sweep" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.597988Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.597915Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.622967Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.622798Z&quot;}}" data-execution_count="13">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-sweep-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;4: Size sweep (ours, mean ± SE, pp): gap per method, solved σ and achieved ε.
+Table&nbsp;4: Size sweep (ours, mean ± SE, pp): gap per method, solved <span class="math inline">\(\sigma\)</span> and achieved <span class="math inline">\(\varepsilon\)</span>.
 </figcaption>
 <div aria-describedby="tbl-folk-sweep-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-display" data-execution_count="13">
@@ -1004,29 +1033,29 @@ Table&nbsp;4: Size sweep (ours, mean ± SE, pp): gap per method, solved σ and a
 </figure>
 </div>
 </div>
-<p><strong>DP-SGD’s gap shrinks sharply with n, as a threshold rather than a smooth decline.</strong> It is about 10 points up to 10k, falls about 20-fold by 50k, and stays under 1 beyond that.</p>
-<p>That fits Mangold et al.’s result that the gap shrinks with n, a bound for a different method. The shape, though, follows when DP-SGD stops falling back to the constant answer (next section), not a gradual √p/n decay.</p>
-<p><strong>Size and training length move together.</strong> At 20 epochs, n = 5k gets 400 steps and all of California 12,240. DP-SGD’s cost here is almost all clipping (ε sweep below), and small clipped steps need many steps. So part of the decline may be “more steps”, not “more data”.</p>
+<p><strong>DP-SGD’s gap shrinks sharply with <span class="math inline">\(n\)</span>, as a threshold rather than a smooth decline.</strong> It is about 10 points up to 10k, falls about 20-fold by 50k, and stays under 1 beyond that.</p>
+<p>That fits Mangold et al.’s result that the gap shrinks with <span class="math inline">\(n\)</span>, a bound for a different method. The shape, though, follows when DP-SGD stops falling back to the constant answer (next section), not a gradual <span class="math inline">\(\sqrt{p}/n\)</span> decay.</p>
+<p><strong>Size and training length move together.</strong> At 20 epochs, <span class="math inline">\(n\)</span> = 5k gets 400 steps and all of California 12,240. DP-SGD’s cost here is almost all clipping (<span class="math inline">\(\varepsilon\)</span> sweep below), and small clipped steps need many steps. So part of the decline may be “more steps”, not “more data”.</p>
 <ul>
 <li><strong>At Adult’s size (25k):</strong> the gap is 3.0 ± 0.6 against Adult’s 7.1 ± 0.3. Men pay more on both. We read the difference as men being far harder than women on Adult.</li>
-<li><strong>At large n:</strong> from 50k on, women pay slightly more, by 0.1–0.5 points of accuracy and more in false negatives.</li>
-<li><strong>Global-Adapt: at most 0.6 points at every n.</strong> At small n it reduces DP-SGD’s 10-point gap to under 1.
+<li><strong>At large <span class="math inline">\(n\)</span>:</strong> from 50k on, women pay slightly more, by 0.1–0.5 points of accuracy and more in false negatives.</li>
+<li><strong>Global-Adapt: at most 0.6 points at every <span class="math inline">\(n\)</span>.</strong> At small <span class="math inline">\(n\)</span> it reduces DP-SGD’s 10-point gap to under 1.
 <ul>
-<li>Its π is negative there: it beats the non-private model by up to 6 points at 5k.</li>
-<li>That is not privacy helping. The non-private model (400 steps, lr 0.01) is undertrained, and Global-Adapt’s steps are 20× larger. Against a non-private model at lr 0.2, Global-Adapt’s π is +2.7 / +2.6 at 5k (baseline check below).</li>
+<li>Its <span class="math inline">\(\pi\)</span> is negative there: it beats the non-private model by up to 6 points at 5k.</li>
+<li>That is not privacy helping. The non-private model (400 steps, lr 0.01) is undertrained, and Global-Adapt’s steps are 20× larger. Against a non-private model at lr 0.2, Global-Adapt’s <span class="math inline">\(\pi\)</span> is +2.7 / +2.6 at 5k (baseline check below).</li>
 </ul></li>
 </ul>
 </section>
 <section id="race-when-the-harder-group-is-also-the-smaller-one" class="level2">
 <h2 class="anchored" data-anchor-id="race-when-the-harder-group-is-also-the-smaller-one">Race: when the harder group is also the smaller one</h2>
 <p>Black Californians are the smaller group (about 6,900 in training) and the harder one (about 2 points lower non-private accuracy). On MNIST, where the hard group was rare, Global-Adapt only partly closed the gap. How much does it recover here?</p>
-<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.479474Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.479407Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.485797Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.485598Z&quot;}}" data-execution_count="14">
+<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.624107Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.624037Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.630443Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.630130Z&quot;}}" data-execution_count="14">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"train"</span>: race[<span class="dv">0</span>][<span class="st">"train_counts"</span>], <span class="st">"test"</span>: [race[<span class="dv">0</span>][<span class="st">"evaluation"</span>][<span class="st">"groups"</span>][g][<span class="st">"n"</span>] <span class="cf">for</span> g <span class="kw">in</span> RACES],</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>              <span class="st">"share &gt; $50K (%)"</span>: A.base_rates(race, <span class="st">"folktables_race"</span>)[<span class="st">"share positive"</span>].to_list()}, index<span class="op">=</span>RACES)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-race-counts" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.479474Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.479407Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.485797Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.485598Z&quot;}}" data-execution_count="14">
+<div id="tbl-folk-race-counts" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.624107Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.624037Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.630443Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.630130Z&quot;}}" data-execution_count="14">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-race-counts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;5: White and Black Californians (seed 0 counts; share &gt; $50K is the 5-seed test mean).
@@ -1067,7 +1096,7 @@ Table&nbsp;5: White and Black Californians (seed 0 counts; share &gt; $50K is th
 </figure>
 </div>
 </div>
-<div id="cell-fig-folk-race-acc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.486608Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.486537Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.546822Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.546555Z&quot;}}" data-execution_count="15">
+<div id="cell-fig-folk-race-acc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.631187Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.631123Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.692725Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.692528Z&quot;}}" data-execution_count="15">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>plots.group_bars(A.summarize(df_race, <span class="st">"accuracy"</span>), RACES, <span class="st">"Test accuracy (%)"</span>, label_groups<span class="op">=</span>RACES)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1085,7 +1114,7 @@ Figure&nbsp;8: Test accuracy, white vs Black, all three methods (ours; mean ± S
 </div>
 </div>
 </div>
-<div id="cell-fig-folk-race-cost" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.547807Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.547741Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.596422Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.595994Z&quot;}}" data-execution_count="16">
+<div id="cell-fig-folk-race-cost" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.693676Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.693604Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.741824Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.741626Z&quot;}}" data-execution_count="16">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>plots.group_bars(A.summarize(A.privacy_costs(df_race), <span class="st">"pi"</span>), RACES, <span class="st">"Privacy cost π (pp)"</span>, label_groups<span class="op">=</span>RACES)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1103,7 +1132,7 @@ Figure&nbsp;9: Privacy cost, white vs Black (ours; mean ± SE).
 </div>
 </div>
 </div>
-<div id="cell-fig-folk-race-gap" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.597255Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.597187Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.679972Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.679714Z&quot;}}" data-execution_count="17">
+<div id="cell-fig-folk-race-gap" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.742832Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.742760Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.827716Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.827275Z&quot;}}" data-execution_count="17">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>plots.gap_bars(A.gaps(df_race, <span class="st">"folktables_race"</span>), <span class="st">"folktables_race"</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1115,7 +1144,7 @@ Figure&nbsp;9: Privacy cost, white vs Black (ours; mean ± SE).
 <img src="05_folktables_files/figure-html/fig-folk-race-gap-output-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-folk-race-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10: Privacy-cost gap |π_White − π_Black| (ours; mean ± SE; no published target).
+Figure&nbsp;10: Privacy-cost gap <span class="math inline">\(\lvert \pi_{\text{White}} - \pi_{\text{Black}} \rvert\)</span> (ours; mean ± SE; no published target).
 </figcaption>
 </figure>
 </div>
@@ -1133,18 +1162,18 @@ Figure&nbsp;10: Privacy-cost gap |π_White − π_Black| (ours; mean ± SE; no p
 </section>
 <section id="testing-our-adult-observation-does-dp-sgd-fall-back-to-always-50k" class="level2">
 <h2 class="anchored" data-anchor-id="testing-our-adult-observation-does-dp-sgd-fall-back-to-always-50k">Testing our Adult observation: does DP-SGD fall back to “always ≤ $50K”?</h2>
-<p>On Adult (ours, not published), DP-SGD’s accuracy was close to always predicting “≤ $50K”. Each group’s π was close to its <strong>headroom</strong>, meaning how far its non-private model sat above that constant. If that holds, the gap is just the difference in headroom. Here the fallback is costlier, because the base rates are higher.</p>
-<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.680864Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.680776Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.718880Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.718494Z&quot;}}" data-execution_count="18">
+<p>On Adult (ours, not published), DP-SGD’s accuracy was close to always predicting “≤ $50K”. Each group’s <span class="math inline">\(\pi\)</span> was close to its <strong>headroom</strong>, meaning how far its non-private model sat above that constant. If that holds, the gap is just the difference in headroom. Here the fallback is costlier, because the base rates are higher.</p>
+<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.828747Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.828653Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.864613Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.864392Z&quot;}}" data-execution_count="18">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>pd.concat({<span class="st">"Adult (balanced)"</span>: A.base_rates(adult, <span class="st">"adult"</span>),</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>           <span class="op">**</span>{<span class="ss">f"CA n = </span><span class="sc">{</span>n<span class="sc">:,}</span><span class="ss">"</span>: A.base_rates(r, <span class="st">"folktables_sex"</span>) <span class="cf">for</span> n, r <span class="kw">in</span> sweep.items()},</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>           <span class="st">"CA balanced"</span>: A.base_rates(bal, <span class="st">"folktables_sex"</span>), <span class="st">"CA race"</span>: A.base_rates(race, <span class="st">"folktables_race"</span>)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-baserate" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.680864Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.680776Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.718880Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.718494Z&quot;}}" data-execution_count="18">
+<div id="tbl-folk-baserate" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.828747Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.828653Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.864613Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.864392Z&quot;}}" data-execution_count="18">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-baserate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;6: Does DP-SGD fall back to always predicting ≤ $50K? (ours, %, mean over 5 seeds). Headroom = non-private − constant accuracy. A fallback shows as FNR ≈ 100 and π ≈ headroom.
+Table&nbsp;6: Does DP-SGD fall back to always predicting ≤ $50K? (ours, %, mean over 5 seeds). Headroom = non-private − constant accuracy. A fallback shows as FNR ≈ 100 and <span class="math inline">\(\pi\)</span> ≈ headroom.
 </figcaption>
 <div aria-describedby="tbl-folk-baserate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-display" data-execution_count="18">
@@ -1364,7 +1393,7 @@ Table&nbsp;6: Does DP-SGD fall back to always predicting ≤ $50K? (ours, %, mea
 </figure>
 </div>
 </div>
-<div id="cell-fig-folk-sweep-fnr" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.719580Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.719508Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.811101Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.810821Z&quot;}}" data-execution_count="19">
+<div id="cell-fig-folk-sweep-fnr" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.865468Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.865400Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:49.954354Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:49.953951Z&quot;}}" data-execution_count="19">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>plots.vs_n(sw[<span class="st">"fnr"</span>], <span class="st">"Missed high earners per 100"</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1382,13 +1411,13 @@ Figure&nbsp;11: False-negative rate per sex vs training-set size (ours; mean ± 
 </div>
 </div>
 </div>
-<p><strong>At 5k and 10k it holds almost exactly:</strong> DP-SGD misses 98–100% of high earners, and π matches the headroom to within 0.6 points.</p>
+<p><strong>At 5k and 10k it holds almost exactly:</strong> DP-SGD misses 98–100% of high earners, and <span class="math inline">\(\pi\)</span> matches the headroom to within 0.6 points.</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
 <th></th>
-<th>Men: headroom / π</th>
-<th>Women: headroom / π</th>
+<th>Men: headroom / <span class="math inline">\(\pi\)</span></th>
+<th>Women: headroom / <span class="math inline">\(\pi\)</span></th>
 </tr>
 </thead>
 <tbody>
@@ -1409,19 +1438,19 @@ Figure&nbsp;11: False-negative rate per sex vs training-set size (ours; mean ± 
 </tr>
 </tbody>
 </table>
-<p>Once DP-SGD’s accuracy equals the constant’s, π equals the headroom by definition, under any baseline: 25.8 / 25.7 for men at 5k against the lr-0.2 baseline. <strong>The finding is the fallback itself.</strong></p>
+<p>Once DP-SGD’s accuracy equals the constant’s, <span class="math inline">\(\pi\)</span> equals the headroom by definition, under any baseline: 25.8 / 25.7 for men at 5k against the lr-0.2 baseline. <strong>The finding is the fallback itself.</strong></p>
 <p><strong>From 25k on it breaks down.</strong></p>
 <ul>
-<li>At 25k, DP-SGD still misses 72% of high-earning men and 88% of women, but π is below the headroom.</li>
-<li>From 50k on, its false-negative rates are 1–10 points above non-private, and π is at most a fifth of the headroom.</li>
-<li>The size sweep’s gap collapses at the same n.</li>
+<li>At 25k, DP-SGD still misses 72% of high-earning men and 88% of women, but <span class="math inline">\(\pi\)</span> is below the headroom.</li>
+<li>From 50k on, its false-negative rates are 1–10 points above non-private, and <span class="math inline">\(\pi\)</span> is at most a fifth of the headroom.</li>
+<li>The size sweep’s gap collapses at the same <span class="math inline">\(n\)</span>.</li>
 </ul>
-<p>So the large gaps arise when DP-SGD learns nothing beyond the majority answer. The group whose non-private model had learned more loses more. The ε sweep shows that clipping, not noise, drives this fallback, which fits Esipova et al.&nbsp;Whether clipping hurts through the update’s <em>direction</em> (their gradient misalignment) or its <em>size</em> needs the mechanism experiments.</p>
+<p>So the large gaps arise when DP-SGD learns nothing beyond the majority answer. The group whose non-private model had learned more loses more. The <span class="math inline">\(\varepsilon\)</span> sweep shows that clipping, not noise, drives this fallback, which fits Esipova et al.&nbsp;Whether clipping hurts through the update’s <em>direction</em> (their gradient misalignment) or its <em>size</em> needs the mechanism experiments.</p>
 </section>
 <section id="privacy-budget-sweep-does-stronger-privacy-widen-the-gap" class="level2">
 <h2 class="anchored" data-anchor-id="privacy-budget-sweep-does-stronger-privacy-widen-the-gap">Privacy budget sweep: does stronger privacy widen the gap?</h2>
-<p>Sanyal et al.&nbsp;(2022) predict that the gap grows as privacy tightens, then shrinks once everyone does badly. We vary ε from 0.5 to 8 (σ ≈ 4.1 to 0.7) at n = 25k, where the size sweep changes fastest.</p>
-<div id="4c48b5b7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.812223Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.812153Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.868457Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.867902Z&quot;}}" data-execution_count="20">
+<p>Sanyal et al.&nbsp;(2022) predict that the gap grows as privacy tightens, then shrinks once everyone does badly. We vary <span class="math inline">\(\varepsilon\)</span> from 0.5 to 8 (<span class="math inline">\(\sigma \approx 4.1\)</span> to 0.7) at <span class="math inline">\(n\)</span> = 25k, where the size sweep changes fastest.</p>
+<div id="4c48b5b7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:49.955230Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:49.955156Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:50.011136Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:50.010643Z&quot;}}" data-execution_count="20">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>EPS <span class="op">=</span> [<span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="fl">3.41</span>, <span class="dv">8</span>]</span>
@@ -1429,7 +1458,7 @@ Figure&nbsp;11: False-negative rate per sex vs training-set size (ours; mean ± 
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>es <span class="op">=</span> A.size_sweep(eps_runs, <span class="st">"folktables_sex"</span>, key<span class="op">=</span><span class="st">"epsilon"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="cell-fig-folk-eps" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.869548Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.869448Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:53.934441Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:53.934124Z&quot;}}" data-execution_count="21">
+<div id="cell-fig-folk-eps" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:50.012460Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:50.012378Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:50.077382Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:50.077092Z&quot;}}" data-execution_count="21">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>plots.vs_n(es[<span class="st">"gap"</span>], <span class="st">"Privacy-cost gap (pp)"</span>, x<span class="op">=</span><span class="st">"epsilon"</span>, xlabel<span class="op">=</span><span class="st">"Privacy budget ε (log scale; smaller = more private)"</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1441,13 +1470,13 @@ Figure&nbsp;11: False-negative rate per sex vs training-set size (ours; mean ± 
 <img src="05_folktables_files/figure-html/fig-folk-eps-output-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-folk-eps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;12: Privacy-cost gap vs ε at n = 25,000, CA natural ratio (ours; mean ± SE). Smaller ε = stronger privacy.
+Figure&nbsp;12: Privacy-cost gap vs <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(n\)</span> = 25,000, CA natural ratio (ours; mean ± SE). Smaller <span class="math inline">\(\varepsilon\)</span> = stronger privacy.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
-<div id="cell-fig-folk-eps-pi" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:53.935274Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:53.935197Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.013719Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.013244Z&quot;}}" data-execution_count="22">
+<div id="cell-fig-folk-eps-pi" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:50.078546Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:50.078466Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:50.157235Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:50.156972Z&quot;}}" data-execution_count="22">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>plots.vs_n(es[<span class="st">"pi"</span>], <span class="st">"Privacy cost π (pp)"</span>, x<span class="op">=</span><span class="st">"epsilon"</span>, xlabel<span class="op">=</span><span class="st">"Privacy budget ε (log scale; smaller = more private)"</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1459,13 +1488,13 @@ Figure&nbsp;12: Privacy-cost gap vs ε at n = 25,000, CA natural ratio (ours; me
 <img src="05_folktables_files/figure-html/fig-folk-eps-pi-output-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-folk-eps-pi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;13: Privacy cost per sex vs ε at n = 25,000, against the lr-0.01 baseline (ours; mean ± SE). Solid: men; dashed: women. Global-Adapt’s values below 0: see the baseline check.
+Figure&nbsp;13: Privacy cost per sex vs <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(n\)</span> = 25,000, against the lr-0.01 baseline (ours; mean ± SE). Solid: men; dashed: women. Global-Adapt’s values below 0: see the baseline check.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
-<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.014567Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.014469Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.036725Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.036474Z&quot;}}" data-execution_count="23">
+<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:50.158374Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:50.158297Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:50.180204Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:50.179954Z&quot;}}" data-execution_count="23">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>info_e <span class="op">=</span> pd.concat({e: A.run_info(r) <span class="cf">for</span> e, r <span class="kw">in</span> eps_runs.items()}, names<span class="op">=</span>[<span class="st">"target ε"</span>, <span class="st">"method"</span>])</span>
@@ -1473,10 +1502,10 @@ Figure&nbsp;13: Privacy cost per sex vs ε at n = 25,000, against the lr-0.01 ba
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> gap_e.set_index([<span class="st">"target ε"</span>, <span class="st">"method"</span>])[[<span class="st">"mean"</span>, <span class="st">"se"</span>]].<span class="bu">round</span>(<span class="dv">2</span>).join(info_e[[<span class="st">"sigma"</span>, <span class="st">"epsilon"</span>]])</span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>out.rename(columns<span class="op">=</span>{<span class="st">"mean"</span>: <span class="st">"gap"</span>, <span class="st">"se"</span>: <span class="st">"SE"</span>, <span class="st">"sigma"</span>: <span class="st">"σ (solved)"</span>, <span class="st">"epsilon"</span>: <span class="st">"ε (achieved)"</span>}).rename_axis([<span class="st">"target ε"</span>, <span class="st">"Method"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-eps" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.014567Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.014469Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.036725Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.036474Z&quot;}}" data-execution_count="23">
+<div id="tbl-folk-eps" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:50.158374Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:50.158297Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:50.180204Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:50.179954Z&quot;}}" data-execution_count="23">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-eps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;7: ε sweep at n = 25,000 (ours, mean ± SE, pp): gap, solved σ and achieved ε.
+Table&nbsp;7: <span class="math inline">\(\varepsilon\)</span> sweep at <span class="math inline">\(n\)</span> = 25,000 (ours, mean ± SE, pp): gap, solved <span class="math inline">\(\sigma\)</span> and achieved <span class="math inline">\(\varepsilon\)</span>.
 </figcaption>
 <div aria-describedby="tbl-folk-eps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-display" data-execution_count="23">
@@ -1587,8 +1616,8 @@ Table&nbsp;7: ε sweep at n = 25,000 (ours, mean ± SE, pp): gap, solved σ and 
 </figure>
 </div>
 </div>
-<p><strong>The gap does not move.</strong> DP-SGD’s gap is 2.9–3.0 at every ε, and each sex’s π changes by under 0.1, although σ varies almost 6-fold. Global-Adapt stays at about 0.2. There is no two-phase pattern in this range; much stronger privacy would eventually let the noise dominate.</p>
-<p><strong>Diagnostic, seed 0 only, outside the stored sweep:</strong> DP-SGD with σ = 0, which is clipping only with no privacy.</p>
+<p><strong>The gap does not move.</strong> DP-SGD’s gap is 2.9–3.0 at every <span class="math inline">\(\varepsilon\)</span>, and each sex’s <span class="math inline">\(\pi\)</span> changes by under 0.1, although <span class="math inline">\(\sigma\)</span> varies almost 6-fold. Global-Adapt stays at about 0.2. There is no two-phase pattern in this range; much stronger privacy would eventually let the noise dominate.</p>
+<p><strong>Diagnostic, seed 0 only, outside the stored sweep:</strong> DP-SGD with <span class="math inline">\(\sigma = 0\)</span>, which is clipping only with no privacy.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 25%">
@@ -1599,14 +1628,14 @@ Table&nbsp;7: ε sweep at n = 25,000 (ours, mean ± SE, pp): gap, solved σ and 
 <thead>
 <tr class="header">
 <th>Seed 0, ours, accuracy men / women</th>
-<th>σ = 0 (clip only)</th>
-<th>σ = 4.06 (ε ≈ 0.5)</th>
-<th>σ = 20 (ε ≈ 0.16)</th>
+<th><span class="math inline">\(\sigma = 0\)</span> (clip only)</th>
+<th><span class="math inline">\(\sigma = 4.06\)</span> (<span class="math inline">\(\varepsilon \approx 0.5\)</span>)</th>
+<th><span class="math inline">\(\sigma = 20\)</span> (<span class="math inline">\(\varepsilon \approx 0.16\)</span>)</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>n = 25k</td>
+<td><span class="math inline">\(n\)</span> = 25k</td>
 <td>62.1 / 67.1</td>
 <td>61.8 / 67.0</td>
 <td>61.5 / 66.8</td>
@@ -1614,20 +1643,20 @@ Table&nbsp;7: ε sweep at n = 25,000 (ours, mean ± SE, pp): gap, solved σ and 
 <tr class="even">
 <td>All of California</td>
 <td>77.04 / 78.23</td>
-<td>77.03 / 78.22 at ε = 3.41</td>
+<td>77.03 / 78.22 at <span class="math inline">\(\varepsilon = 3.41\)</span></td>
 <td>–</td>
 </tr>
 </tbody>
 </table>
-<p><strong>So nearly all of DP-SGD’s cost and gap here comes from clipping, not noise.</strong> With C = 0.5 and lr 0.01, clipped steps are small, and 20 epochs get the model only partway. The noise averages out; the clipping is systematic.</p>
-<p>Global-Adapt’s π sits just below 0 at every ε for the same reason as at small n.&nbsp;Against the lr-0.2 baseline it is about +1.3 to +1.8.</p>
+<p><strong>So nearly all of DP-SGD’s cost and gap here comes from clipping, not noise.</strong> With <span class="math inline">\(C = 0.5\)</span> and lr 0.01, clipped steps are small, and 20 epochs get the model only partway. The noise averages out; the clipping is systematic.</p>
+<p>Global-Adapt’s <span class="math inline">\(\pi\)</span> sits just below 0 at every <span class="math inline">\(\varepsilon\)</span> for the same reason as at small <span class="math inline">\(n\)</span>. Against the lr-0.2 baseline it is about +1.3 to +1.8.</p>
 <p>This is <em>consistent with</em> Esipova et al., and a caution for reading the size sweep. Adult uses the same settings, so this may hold there too; we have not checked.</p>
 </section>
 <section id="checking-the-baseline-non-private-at-global-adapts-learning-rate" class="level2">
 <h2 class="anchored" data-anchor-id="checking-the-baseline-non-private-at-global-adapts-learning-rate">Checking the baseline: non-private at Global-Adapt’s learning rate</h2>
-<p>Every privacy cost is measured against a non-private model. Ours uses Adult’s preset, lr 0.01, which is undertrained at small n: at 5k it gets 400 steps. Global-Adapt, at lr 0.2, beats it, and that produces the negative π in the size-sweep and ε figures.</p>
-<p>To check how much the conclusions depend on this, we also trained the non-private model at Global-Adapt’s lr 0.2, for every setting (5 seeds each), and recomputed π and the gaps against it. The lr-0.01 baseline stays primary on this page, for comparability with Adult and the paper.</p>
-<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.037699Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.037606Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.154621Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.153986Z&quot;}}" data-execution_count="24">
+<p>Every privacy cost is measured against a non-private model. Ours uses Adult’s preset, lr 0.01, which is undertrained at small <span class="math inline">\(n\)</span>: at 5k it gets 400 steps. Global-Adapt, at lr 0.2, beats it, and that produces the negative <span class="math inline">\(\pi\)</span> in the size-sweep and <span class="math inline">\(\varepsilon\)</span> figures.</p>
+<p>To check how much the conclusions depend on this, we also trained the non-private model at Global-Adapt’s lr 0.2, for every setting (5 seeds each), and recomputed <span class="math inline">\(\pi\)</span> and the gaps against it. The lr-0.01 baseline stays primary on this page, for comparability with Adult and the paper.</p>
+<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:50.181344Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:50.181265Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:50.304766Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:50.304524Z&quot;}}" data-execution_count="24">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>CASES <span class="op">=</span> {<span class="op">**</span>{<span class="ss">f"n = </span><span class="sc">{</span>n<span class="sc">:,}</span><span class="ss">"</span>: (<span class="st">"folktables_sex"</span>, {<span class="st">"n_train"</span>: n}) <span class="cf">for</span> n <span class="kw">in</span> NS}, <span class="st">"all CA, natural"</span>: (<span class="st">"folktables_sex"</span>, {}),</span>
@@ -1635,10 +1664,10 @@ Table&nbsp;7: ε sweep at n = 25,000 (ours, mean ± SE, pp): gap, solved σ and 
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>pd.concat({label: A.setting_summary({k: (runner.load(ds, SOURCE, baseline_lr<span class="op">=</span>lr, <span class="op">**</span>kw), ds) <span class="cf">for</span> k, (ds, kw) <span class="kw">in</span> CASES.items()})</span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>           <span class="cf">for</span> label, lr <span class="kw">in</span> {<span class="st">"lr 0.01 (preset)"</span>: <span class="va">None</span>, <span class="st">"lr 0.2 (matched)"</span>: <span class="fl">0.2</span>}.items()}, names<span class="op">=</span>[<span class="st">"non-private baseline"</span>, <span class="st">"setting"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-baseline" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.037699Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.037606Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.154621Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.153986Z&quot;}}" data-execution_count="24">
+<div id="tbl-folk-baseline" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:50.181344Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:50.181265Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:50.304766Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:50.304524Z&quot;}}" data-execution_count="24">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-baseline-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;8: Privacy-cost gaps and Global-Adapt’s π against two non-private baselines: lr 0.01 (preset, used elsewhere on this page) and lr 0.2 (Global-Adapt’s). Ours; mean ± SE over 5 seeds, pp; pairs are first / second group.
+Table&nbsp;8: Privacy-cost gaps and Global-Adapt’s <span class="math inline">\(\pi\)</span> against two non-private baselines: lr 0.01 (preset, used elsewhere on this page) and lr 0.2 (Global-Adapt’s). Ours; mean ± SE over 5 seeds, pp; pairs are first / second group.
 </figcaption>
 <div aria-describedby="tbl-folk-baseline-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-display" data-execution_count="24">
@@ -1806,7 +1835,7 @@ Table&nbsp;8: Privacy-cost gaps and Global-Adapt’s π against two non-private 
 </figure>
 </div>
 </div>
-<div id="cell-fig-folk-baseline-pi" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.155614Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.155532Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.292598Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.292062Z&quot;}}" data-execution_count="25">
+<div id="cell-fig-folk-baseline-pi" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:50.305836Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:50.305750Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:50.445616Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:50.445378Z&quot;}}" data-execution_count="25">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>sweep_m <span class="op">=</span> {n: runner.load(<span class="st">"folktables_sex"</span>, SOURCE, n_train<span class="op">=</span>n, baseline_lr<span class="op">=</span><span class="fl">0.2</span>) <span class="cf">for</span> n <span class="kw">in</span> NS} <span class="op">|</span> {<span class="bu">max</span>(sweep): runner.load(<span class="st">"folktables_sex"</span>, SOURCE, baseline_lr<span class="op">=</span><span class="fl">0.2</span>)}</span>
@@ -1834,7 +1863,7 @@ Figure&nbsp;14: Privacy cost per sex vs training-set size, measured against the 
 </ul></li>
 <li><strong>DP-SGD’s gap keeps its shape.</strong> From 5k to all of California it is 10.2, 10.0, 2.9, 0.3, 0.4, 0.4 (against 9.5, 9.9, 3.0, 0.5, 0.3, 0.1). At full size it is 0.4 ± 0.1 rather than 0.1: still under 1 point, with women paying slightly more.</li>
 <li><strong>Global-Adapt’s gap stays at or below about 0.6</strong> under both baselines.</li>
-<li><strong>Global-Adapt’s π turns positive.</strong> It is +2.7 / +2.6 at 5k (instead of −6.1 / −5.5), about +1.4 at 25k, and +0.5 / +0.8 on all of California.
+<li><strong>Global-Adapt’s <span class="math inline">\(\pi\)</span> turns positive.</strong> It is +2.7 / +2.6 at 5k (instead of −6.1 / −5.5), about +1.4 at 25k, and +0.5 / +0.8 on all of California.
 <ul>
 <li>So the negative costs came from the weak baseline. Global-Adapt recovers most, but not all, of a well-trained non-private model’s accuracy.</li>
 <li>At 10k and on balanced CA it stays slightly negative, because of the noisy baseline runs.</li>
@@ -1842,19 +1871,19 @@ Figure&nbsp;14: Privacy cost per sex vs training-set size, measured against the 
 <li><strong>DP-SGD’s costs grow</strong> (25.7 / 15.4 at 5k, 4.3 / 4.6 on all of California). The false-negative finding gets stronger: on balanced CA, DP-SGD misses about 11 more high-earning women per 100 than the lr-0.2 model, and about 4 more men.</li>
 <li><strong>Race:</strong> DP-SGD’s gap is 0.5 ± 0.2 (one seed in five has the opposite sign), and Global-Adapt’s is 0.0 ± 0.3.</li>
 </ul>
-<p><strong>Still unresolved:</strong> DP-SGD (lr 0.01) and Global-Adapt (lr 0.2) still differ in learning rate, and the private models’ step count still grows with n.</p>
+<p><strong>Still unresolved:</strong> DP-SGD (lr 0.01) and Global-Adapt (lr 0.2) still differ in learning rate, and the private models’ step count still grows with <span class="math inline">\(n\)</span>.</p>
 </section>
 <section id="run-details" class="level2">
 <h2 class="anchored" data-anchor-id="run-details">Run details</h2>
-<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.293666Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.293577Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.308009Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.307645Z&quot;}}" data-execution_count="26">
+<div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:50.446959Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:50.446868Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:50.460692Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:50.460443Z&quot;}}" data-execution_count="26">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>pd.concat({<span class="st">"CA balanced"</span>: A.run_info(bal), <span class="st">"CA natural ratio"</span>: A.run_info(nat), <span class="st">"CA race"</span>: A.run_info(race)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-folk-runs" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.293666Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.293577Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.308009Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.307645Z&quot;}}" data-execution_count="26">
+<div id="tbl-folk-runs" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:50.446959Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:50.446868Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:50.460692Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:50.460443Z&quot;}}" data-execution_count="26">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-folk-runs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;9: Achieved ε (RDP, δ = 10⁻⁶), solved σ and final Z, means over seeds (ours).
+Table&nbsp;9: Achieved <span class="math inline">\(\varepsilon\)</span> (RDP, <span class="math inline">\(\delta = 10^{-6}\)</span>), solved <span class="math inline">\(\sigma\)</span> and final <span class="math inline">\(Z\)</span>, means over seeds (ours).
 </figcaption>
 <div aria-describedby="tbl-folk-runs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-display" data-execution_count="26">
@@ -1978,7 +2007,7 @@ Table&nbsp;9: Achieved ε (RDP, δ = 10⁻⁶), solved σ and final Z, means ove
 </figure>
 </div>
 </div>
-<div id="9c1c338f" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T12:15:54.308822Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T12:15:54.308755Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T12:15:54.310672Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T12:15:54.310433Z&quot;}}" data-execution_count="27">
+<div id="9c1c338f" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-13T23:11:50.461558Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-13T23:11:50.461485Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-13T23:11:50.463210Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-13T23:11:50.462995Z&quot;}}" data-execution_count="27">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>nat[<span class="op">-</span><span class="dv">1</span>][<span class="st">"provenance"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1998,13 +2027,13 @@ Table&nbsp;9: Achieved ε (RDP, δ = 10⁻⁶), solved σ and final Z, means ove
 </section>
 <section id="takeaways" class="level2">
 <h2 class="anchored" data-anchor-id="takeaways">Takeaways</h2>
-<p>All numbers are ours, at ε = 3.41.</p>
+<p>All numbers are ours, at <span class="math inline">\(\varepsilon = 3.41\)</span>.</p>
 <ul>
-<li><strong>The gap shrinks with size:</strong> about 10 points at 5–10k, under 1 from 50k on, and 0.1 on all of California (0.4 against a better-trained non-private baseline). This is <em>consistent with</em> Mangold et al., though training length also grows with n.</li>
-<li><strong>Large gaps mean DP-SGD falls back to the majority answer</strong> at small n, as our Adult observation suggested. π then equals each group’s headroom, so the gap is the difference in headroom.</li>
-<li><strong>Clipping, not noise, carries the cost:</strong> the gap is flat for ε from 0.5 to 8. This is <em>consistent with</em> Esipova et al.</li>
+<li><strong>The gap shrinks with size:</strong> about 10 points at 5–10k, under 1 from 50k on, and 0.1 on all of California (0.4 against a better-trained non-private baseline). This is <em>consistent with</em> Mangold et al., though training length also grows with <span class="math inline">\(n\)</span>.</li>
+<li><strong>Large gaps mean DP-SGD falls back to the majority answer</strong> at small <span class="math inline">\(n\)</span>, as our Adult observation suggested. <span class="math inline">\(\pi\)</span> then equals each group’s headroom, so the gap is the difference in headroom.</li>
+<li><strong>Clipping, not noise, carries the cost:</strong> the gap is flat for <span class="math inline">\(\varepsilon\)</span> from 0.5 to 8. This is <em>consistent with</em> Esipova et al.</li>
 <li><strong>Adult’s 7-point gap does not carry over at full size:</strong> it is 3.0 at Adult’s size here, where men are barely harder.</li>
-<li><strong>Global-Adapt keeps the gap at 0.6 or less at every n,</strong> under both baselines, and recovers most of both groups’ accuracy. Its negative costs at small n came from the undertrained lr-0.01 baseline.</li>
+<li><strong>Global-Adapt keeps the gap at 0.6 or less at every <span class="math inline">\(n\)</span>,</strong> under both baselines, and recovers most of both groups’ accuracy. Its negative costs at small <span class="math inline">\(n\)</span> came from the undertrained lr-0.01 baseline.</li>
 <li><strong>Race:</strong> at full size both groups pay about the same, but Black Californians get more false positives.</li>
 <li><strong>Accuracy hides the error type:</strong> DP-SGD misses about 7 more high-earning women per 100 against 3 more men.</li>
 </ul>
@@ -2013,14 +2042,14 @@ Table&nbsp;9: Achieved ε (RDP, δ = 10⁻⁶), solved σ and final Z, means ove
 <h2 class="anchored" data-anchor-id="caveats">Caveats</h2>
 <ul>
 <li><strong>Extension, not a reproduction:</strong> there is no published target, and every number is ours.</li>
-<li><strong>Training length is tied to n</strong> (400 steps at 5k, 12,240 on all of California).
+<li><strong>Training length is tied to <span class="math inline">\(n\)</span></strong> (400 steps at 5k, 12,240 on all of California).
 <ul>
-<li>The preset (lr 0.01) non-private baseline is undertrained at small n, with false-negative rates of 43% (men) and 60% (women) at 5k. A matched lr-0.2 baseline leaves the gap conclusions unchanged (baseline check), but it is itself noisy in 3 of 40 runs.</li>
+<li>The preset (lr 0.01) non-private baseline is undertrained at small <span class="math inline">\(n\)</span>, with false-negative rates of 43% (men) and 60% (women) at 5k. A matched lr-0.2 baseline leaves the gap conclusions unchanged (baseline check), but it is itself noisy in 3 of 40 runs.</li>
 <li>Because the cost is clipping-driven, part of the size trend may be training length. A fixed-steps sweep would separate them.</li>
 </ul></li>
 <li><strong>The private methods’ learning rates still differ</strong> (Global-Adapt 0.2, DP-SGD 0.01), and that alone could explain much of Global-Adapt’s advantage over DP-SGD. The baseline check matches only the non-private model.</li>
-<li><strong>The clipping-only diagnostic is one seed.</strong> The ε sweep is five.</li>
-<li><strong>Global-Adapt’s count adds ε:</strong> 3.45 at 5k, 0.535 at target 0.5, and under +0.01 on all of California.</li>
+<li><strong>The clipping-only diagnostic is one seed.</strong> The <span class="math inline">\(\varepsilon\)</span> sweep is five.</li>
+<li><strong>Global-Adapt’s count adds <span class="math inline">\(\varepsilon\)</span>:</strong> 3.45 at 5k, 0.535 at target 0.5, and under +0.01 on all of California.</li>
 <li><strong>One state and year</strong> (CA 2018). The <strong>$50K threshold</strong> makes the “≤ $50K” fallback costlier than on Adult.</li>
 <li><strong>These outcome metrics are consistent with gradient misalignment but do not test it.</strong></li>
 </ul>
@@ -2560,7 +2589,7 @@ Table&nbsp;9: Achieved ε (RDP, δ = 10⁻⁶), solved σ and final Z, means ove
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>Reproduction and Expansion of Esipova et al.&nbsp;(ICLR 2023) · Hunter College, Big Data Analytics</p>
+<p>Reproduction and Expansion of Esipova et al.&nbsp;(ICLR 2023) · By Kacper Lisowicz, Yunzhe Zheng, and Daniel Lin</p>
 </div>
     <div class="nav-footer-right">
       &nbsp;

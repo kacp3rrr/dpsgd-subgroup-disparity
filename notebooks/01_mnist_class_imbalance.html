@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>MNIST: class imbalance – DPSGD Subgroup Disparity</title>
+<title>Class Imbalance with MNIST – DPSGD Subgroup Disparity</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -83,9 +83,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-49c787a6c175d90e42264fbd7996148e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-a4fdfacc8dc0ea4efabeda844be85da3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-02ee83c8e965b42b6835df4eefa17818.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-a4fdfacc8dc0ea4efabeda844be85da3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-4c4db7503122e6cface8f2e9b38c952b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-f3844c3a88c312ca498d4ff1b77b307c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-4c4db7503122e6cface8f2e9b38c952b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -118,6 +118,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -364,8 +393,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">MNIST: class imbalance</h1>
-<p class="subtitle lead">A controlled test: what does privacy cost a digit the model rarely sees?</p>
+<h1 class="title">Class Imbalance with MNIST</h1>
+<p class="subtitle lead">A controlled test on what privacy costs for a digit the model rarely sees?</p>
 </div>
 
 
@@ -392,7 +421,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li><strong>Data:</strong> each training 8 is kept with probability 0.09, which leaves 513–537 eights per seed (about 1% of the training data). All 5,958 twos are kept. We evaluate on the full 10,000-image test set (974 eights, 1,032 twos).</li>
 <li><strong>Model:</strong> two 3×3 conv layers (32 and 16 channels), tanh, no pooling, then a linear layer to 10 classes (97,114 parameters).</li>
-<li><strong>Training:</strong> cross-entropy, plain SGD (no momentum), 60 epochs, batch size 256. Private runs use Poisson sampling and an RDP accountant with δ = 10⁻⁶.</li>
+<li><strong>Training:</strong> cross-entropy, plain SGD (no momentum), 60 epochs, batch size 256. Private runs use Poisson sampling and an RDP accountant with <span class="math inline">\(\delta = 10^{-6}\)</span>.</li>
 <li><strong>Seeds:</strong> five (0–4). Within a seed, every method sees the same training subset and starts from the same initial weights.</li>
 <li><strong>Methods</strong>, following the proposal’s four-phase design:
 <ol type="1">
@@ -417,7 +446,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>A.settings_table(<span class="st">"mnist"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-mnist-settings" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T10:59:30.345018Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T10:59:30.344888Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T10:59:30.350132Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T10:59:30.349991Z&quot;}}" data-execution_count="2">
+<div id="tbl-mnist-settings" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="2" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T10:59:30.345018Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T10:59:30.344888Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T10:59:30.350132Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T10:59:30.349991Z&quot;}}">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mnist-settings-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1: Hyperparameters per method (Esipova et al., App. B).
@@ -510,7 +539,7 @@ Table&nbsp;1: Hyperparameters per method (Esipova et al., App. B).
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>acc[(acc.method <span class="op">==</span> <span class="st">"nonprivate"</span>) <span class="op">&amp;</span> acc.group.isin([<span class="st">"2"</span>, <span class="st">"8"</span>])].<span class="bu">round</span>(<span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-mnist-phase1" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T10:59:30.366315Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T10:59:30.366245Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T10:59:30.369273Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T10:59:30.368963Z&quot;}}" data-execution_count="4">
+<div id="tbl-mnist-phase1" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="4" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T10:59:30.366315Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T10:59:30.366245Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T10:59:30.369273Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T10:59:30.368963Z&quot;}}">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mnist-phase1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;2: Non-private test accuracy (%), mean ± SE over 5 seeds (ours).
@@ -563,7 +592,7 @@ Table&nbsp;2: Non-private test accuracy (%), mean ± SE over 5 seeds (ours).
 </section>
 <section id="phase-2-dp-sgd" class="level2">
 <h2 class="anchored" data-anchor-id="phase-2-dp-sgd">Phase 2: DP-SGD</h2>
-<p>With DP-SGD (C = 1, σ = 0.8, ε ≈ 5.9), every digit loses some accuracy, but the rare 8 collapses. Its accuracy falls from about 86% to about 25%, while the 2 drops by only about 9 points.</p>
+<p>With DP-SGD (<span class="math inline">\(C = 1\)</span>, <span class="math inline">\(\sigma = 0.8\)</span>, <span class="math inline">\(\varepsilon \approx 5.9\)</span>), every digit loses some accuracy, but the rare 8 collapses. Its accuracy falls from about 86% to about 25%, while the 2 drops by only about 9 points.</p>
 <p>The leading explanation is <strong>gradient misalignment</strong> (Esipova et al., 2023):</p>
 <ul>
 <li>Examples the model fits badly, such as the rare 8s, produce large gradients, so clipping shrinks them the most.</li>
@@ -592,7 +621,7 @@ Figure&nbsp;1: Per-digit test accuracy, non-private vs DP-SGD (ours; mean ± SE 
 </section>
 <section id="phase-3-disparity-evaluation" class="level2">
 <h2 class="anchored" data-anchor-id="phase-3-disparity-evaluation">Phase 3: Disparity evaluation</h2>
-<p>For each digit <em>k</em>, the privacy cost is π_k = A_k(non-private) − A_k(private), paired by seed. The disparity measure is the <strong>privacy-cost gap</strong> |π₂ − π₈|.</p>
+<p>For each digit <span class="math inline">\(k\)</span>, the privacy cost is <span class="math inline">\(\pi_k = A_k(\text{non-private}) - A_k(\text{private})\)</span>, paired by seed. The disparity measure is the <strong>privacy-cost gap</strong> <span class="math inline">\(\lvert \pi_2 - \pi_8 \rvert\)</span>.</p>
 <p>The privacy-cost gap is not the raw accuracy gap. Under DP-SGD the raw gap between 2 and 8 is about 64 points, but about 11 of those were already there without privacy. The privacy-cost gap removes that pre-existing difference.</p>
 <div id="cell-fig-mnist-cost" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T10:59:30.453455Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T10:59:30.453370Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T10:59:30.526916Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T10:59:30.526678Z&quot;}}" data-execution_count="6">
 <details class="code-fold">
@@ -619,9 +648,9 @@ Figure&nbsp;2: Privacy cost per digit (ours; percentage points lost relative to 
 <h2 class="anchored" data-anchor-id="phase-4-dpsgd-global-adapt">Phase 4: DPSGD-Global-Adapt</h2>
 <p>Global-Adapt changes one thing about clipping:</p>
 <ul>
-<li><strong>DP-SGD</strong> clips each large gradient down to C separately. Big gradients shrink a lot, small ones not at all.</li>
-<li><strong>Global-Adapt</strong> scales <em>every</em> gradient by the same factor C/Z, where Z is an upper bound on gradient norms. Their relative sizes, and so the update’s direction, are preserved. Only gradients above Z are still clipped.</li>
-<li><strong>Z is learned privately.</strong> Each step releases a noisy count of how many gradients exceed τ·Z and adjusts Z from it. That count is charged to the privacy budget (ε ≈ 5.91 vs 5.90).</li>
+<li><strong>DP-SGD</strong> clips each large gradient down to <span class="math inline">\(C\)</span> separately. Big gradients shrink a lot, small ones not at all.</li>
+<li><strong>Global-Adapt</strong> scales <em>every</em> gradient by the same factor <span class="math inline">\(C/Z\)</span>, where <span class="math inline">\(Z\)</span> is an upper bound on gradient norms. Their relative sizes, and so the update’s direction, are preserved. Only gradients above <span class="math inline">\(Z\)</span> are still clipped.</li>
+<li><strong><span class="math inline">\(Z\)</span> is learned privately.</strong> Each step releases a noisy count of how many gradients exceed <span class="math inline">\(\tau \cdot Z\)</span> and adjusts <span class="math inline">\(Z\)</span> from it. That count is charged to the privacy budget (<span class="math inline">\(\varepsilon \approx 5.91\)</span> vs 5.90).</li>
 <li><strong>No group labels are used.</strong></li>
 </ul>
 <div id="cell-fig-mnist-acc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T10:59:30.528201Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T10:59:30.528109Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T10:59:30.616801Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T10:59:30.616350Z&quot;}}" data-execution_count="7">
@@ -655,7 +684,7 @@ Figure&nbsp;3: Per-digit test accuracy for all three methods (ours; mean ± SE o
 <img src="01_mnist_class_imbalance_files/figure-html/fig-mnist-gap-output-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mnist-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: Privacy-cost gap |π₂ − π₈|: ours vs Esipova et al.&nbsp;(2023), Table 2. Mean ± SE over 5 seeds.
+Figure&nbsp;4: Privacy-cost gap <span class="math inline">\(\lvert \pi_2 - \pi_8 \rvert\)</span>: ours vs Esipova et al.&nbsp;(2023), Table 2. Mean ± SE over 5 seeds.
 </figcaption>
 </figure>
 </div>
@@ -671,7 +700,7 @@ Figure&nbsp;4: Privacy-cost gap |π₂ − π₈|: ours vs Esipova et al.&nbsp;(
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>A.comparison_table(results, <span class="st">"mnist"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-mnist-compare" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T10:59:30.716874Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T10:59:30.716790Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T10:59:30.734138Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T10:59:30.733941Z&quot;}}" data-execution_count="9">
+<div id="tbl-mnist-compare" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="9" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T10:59:30.716874Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T10:59:30.716790Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T10:59:30.734138Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T10:59:30.733941Z&quot;}}">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mnist-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;3: Ours vs Esipova et al.&nbsp;(2023), Table 2. Mean ± SE over 5 seeds.
@@ -791,7 +820,7 @@ Table&nbsp;3: Ours vs Esipova et al.&nbsp;(2023), Table 2. Mean ± SE over 5 see
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"dp-testing"</span>: A.headline(runner.load(<span class="st">"mnist"</span>, <span class="st">"legacy"</span>), <span class="st">"mnist"</span>),</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>              <span class="st">"this repo (rerun)"</span>: A.headline(runner.load(<span class="st">"mnist"</span>, <span class="st">"rerun"</span>), <span class="st">"mnist"</span>)})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-mnist-rerun" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tags="[&quot;rerun-section&quot;]" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T10:59:30.735297Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T10:59:30.735232Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T10:59:30.767027Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T10:59:30.766433Z&quot;}}" data-execution_count="10">
+<div id="tbl-mnist-rerun" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T10:59:30.735297Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T10:59:30.735232Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T10:59:30.767027Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T10:59:30.766433Z&quot;}}" data-tags="[&quot;rerun-section&quot;]" data-execution_count="10">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mnist-rerun-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;4: Key numbers (means over 5 seeds): original dp-testing runs vs this repository’s rerun.
@@ -874,7 +903,7 @@ Table&nbsp;4: Key numbers (means over 5 seeds): original dp-testing runs vs this
 <li><strong>Accuracies:</strong> every accuracy for digits 2 and 8 is within about 0.4 points.</li>
 <li><strong>DP-SGD gap:</strong> 52.4 ± 0.5 in the rerun vs 52.7 ± 1.4 in dp-testing.</li>
 <li><strong>Global-Adapt gap:</strong> 13.1 ± 1.3 vs 12.9 ± 0.3.</li>
-<li><strong>ε:</strong> unchanged at 5.90 (DP-SGD) and 5.91 (Global-Adapt). MNIST has 214 batches per epoch and Opacus takes 214 steps, so the off-by-one in ε seen on Adult does not arise here.</li>
+<li><strong><span class="math inline">\(\varepsilon\)</span>:</strong> unchanged at 5.90 (DP-SGD) and 5.91 (Global-Adapt). MNIST has 214 batches per epoch and Opacus takes 214 steps, so the off-by-one in <span class="math inline">\(\varepsilon\)</span> seen on Adult does not arise here.</li>
 </ul>
 <p><strong>The DP-SGD gap stays above the paper’s 48.9 ± 1.3 in the rerun.</strong> The difference from Esipova et al.&nbsp;is therefore not an artefact of the original dp-testing code.</p>
 </section>
@@ -885,10 +914,10 @@ Table&nbsp;4: Key numbers (means over 5 seeds): original dp-testing runs vs this
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>A.run_info(results)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-mnist-runs" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T10:59:30.768082Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T10:59:30.768008Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T10:59:30.774302Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T10:59:30.773924Z&quot;}}" data-execution_count="11">
+<div id="tbl-mnist-runs" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="11" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-12T10:59:30.768082Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-12T10:59:30.768008Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-12T10:59:30.774302Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-12T10:59:30.773924Z&quot;}}">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mnist-runs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;5: Achieved privacy (RDP accountant) and final Z, means over seeds.
+Table&nbsp;5: Achieved privacy (RDP accountant) and final <span class="math inline">\(Z\)</span>, means over seeds.
 </figcaption>
 <div aria-describedby="tbl-mnist-runs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-display" data-execution_count="11">
@@ -1505,7 +1534,7 @@ Table&nbsp;5: Achieved privacy (RDP accountant) and final Z, means over seeds.
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>Reproduction and Expansion of Esipova et al.&nbsp;(ICLR 2023) · Hunter College, Big Data Analytics</p>
+<p>Reproduction and Expansion of Esipova et al.&nbsp;(ICLR 2023) · By Kacper Lisowicz, Yunzhe Zheng, and Daniel Lin</p>
 </div>
     <div class="nav-footer-right">
       &nbsp;

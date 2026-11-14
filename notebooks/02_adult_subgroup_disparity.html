@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Adult: subgroup disparity – DPSGD Subgroup Disparity</title>
+<title>Subgroup Disparity with the UCI Adult Dataset – DPSGD Subgroup Disparity</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -83,9 +83,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-49c787a6c175d90e42264fbd7996148e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-a4fdfacc8dc0ea4efabeda844be85da3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-02ee83c8e965b42b6835df4eefa17818.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-a4fdfacc8dc0ea4efabeda844be85da3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-4c4db7503122e6cface8f2e9b38c952b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-f3844c3a88c312ca498d4ff1b77b307c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-4c4db7503122e6cface8f2e9b38c952b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -118,6 +118,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -367,8 +396,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Adult: subgroup disparity</h1>
-<p class="subtitle lead">Real people, equal-sized groups: who pays for privacy?</p>
+<h1 class="title">Subgroup Disparity with the UCI Adult Dataset</h1>
+<p class="subtitle lead">Real people, equal-sized groups, and testing who pays for privacy?</p>
 </div>
 
 
@@ -403,7 +432,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Sex stays an input feature (98 inputs).</li>
 </ul></li>
 <li><strong>Model:</strong> an MLP with two hidden layers of 256 units and tanh (91,650 parameters).</li>
-<li><strong>Training:</strong> cross-entropy, plain SGD, 20 epochs, batch size 256. Private runs use Poisson sampling and an RDP accountant with δ = 10⁻⁶.</li>
+<li><strong>Training:</strong> cross-entropy, plain SGD, 20 epochs, batch size 256. Private runs use Poisson sampling and an RDP accountant with <span class="math inline">\(\delta = 10^{-6}\)</span>.</li>
 <li><strong>Seeds:</strong> five (0–4). Within a seed, every method sees the same split and starts from the same initial weights.</li>
 </ul>
 <div id="4e09a0da" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-07T07:27:46.123542Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-07T07:27:46.123172Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-07T07:27:48.554981Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-07T07:27:48.554415Z&quot;}}" data-execution_count="1">
@@ -565,7 +594,7 @@ Table&nbsp;2: Test set per sex (ours, mean over seeds): size, share earning &gt;
 </section>
 <section id="phase-2-dp-sgd" class="level2">
 <h2 class="anchored" data-anchor-id="phase-2-dp-sgd">Phase 2: DP-SGD</h2>
-<p>With DP-SGD (C = 0.5, σ = 1, ε ≈ 3.41), both groups lose accuracy, but men lose much more: about 11 points against about 4 for women.</p>
+<p>With DP-SGD (<span class="math inline">\(C = 0.5\)</span>, <span class="math inline">\(\sigma = 1\)</span>, <span class="math inline">\(\varepsilon \approx 3.41\)</span>), both groups lose accuracy, but men lose much more: about 11 points against about 4 for women.</p>
 <div id="cell-fig-adult-dpsgd" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-07T07:27:48.578717Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-07T07:27:48.578612Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-07T07:27:48.658713Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-07T07:27:48.658264Z&quot;}}" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
@@ -587,7 +616,7 @@ Figure&nbsp;1: Test accuracy by sex, non-private vs DP-SGD (ours; mean ± SE ove
 </section>
 <section id="phase-3-disparity-evaluation" class="level2">
 <h2 class="anchored" data-anchor-id="phase-3-disparity-evaluation">Phase 3: Disparity evaluation</h2>
-<p>The privacy cost is π_k = A_k(non-private) − A_k(private), paired by seed. The disparity measure is the <strong>privacy-cost gap</strong> |π_Male − π_Female|.</p>
+<p>The privacy cost is <span class="math inline">\(\pi_k = A_k(\text{non-private}) - A_k(\text{private})\)</span>, paired by seed. The disparity measure is the <strong>privacy-cost gap</strong> <span class="math inline">\(\lvert \pi_{\text{Male}} - \pi_{\text{Female}} \rvert\)</span>.</p>
 <div id="cell-fig-adult-cost" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-07T07:27:48.660160Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-07T07:27:48.660050Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-07T07:27:48.730946Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-07T07:27:48.730600Z&quot;}}" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
@@ -659,7 +688,7 @@ Figure&nbsp;3: False-negative rate by sex: real high earners the model misses, p
 </section>
 <section id="phase-4-dpsgd-global-adapt" class="level2">
 <h2 class="anchored" data-anchor-id="phase-4-dpsgd-global-adapt">Phase 4: DPSGD-Global-Adapt</h2>
-<p>Global-Adapt scales every gradient by the same factor C/Z instead of clipping large gradients separately, and learns Z privately. Its noisy count is charged to the privacy budget, giving ε ≈ 3.42 instead of 3.41. It uses no group labels.</p>
+<p>Global-Adapt scales every gradient by the same factor <span class="math inline">\(C/Z\)</span> instead of clipping large gradients separately, and learns <span class="math inline">\(Z\)</span> privately. Its noisy count is charged to the privacy budget, giving <span class="math inline">\(\varepsilon \approx 3.42\)</span> instead of 3.41. It uses no group labels.</p>
 <div id="cell-fig-adult-acc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-07T07:27:48.820470Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-07T07:27:48.820358Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-07T07:27:48.897712Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-07T07:27:48.897040Z&quot;}}" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
@@ -690,7 +719,7 @@ Figure&nbsp;4: Test accuracy by sex for all three methods (ours; mean ± SE over
 <img src="02_adult_subgroup_disparity_files/figure-html/fig-adult-gap-output-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-adult-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: Privacy-cost gap |π_Male − π_Female|: ours vs Esipova et al.&nbsp;(2023), Table 4. Mean ± SE over 5 seeds.
+Figure&nbsp;5: Privacy-cost gap <span class="math inline">\(\lvert \pi_{\text{Male}} - \pi_{\text{Female}} \rvert\)</span>: ours vs Esipova et al.&nbsp;(2023), Table 4. Mean ± SE over 5 seeds.
 </figcaption>
 </figure>
 </div>
@@ -818,13 +847,13 @@ Table&nbsp;3: Ours vs Esipova et al.&nbsp;(2023), Table 4. Mean ± SE over 5 see
 <li><strong>Sex balancing:</strong> whether their loader balances the same way (ours keeps every woman and samples men).</li>
 <li><strong>Sex as an input:</strong> whether sex is an input feature. The paper’s parameter count suggests it is.</li>
 <li><strong>Global-Adapt’s count:</strong> whether it is normalized by the realized or the expected batch size.</li>
-<li><strong>Global-Adapt’s ε:</strong> the paper reports that it matches DP-SGD to three significant digits. Ours is 3.42 vs 3.41.</li>
+<li><strong>Global-Adapt’s <span class="math inline">\(\varepsilon\)</span>:</strong> the paper reports that it matches DP-SGD to three significant digits. Ours is 3.42 vs 3.41.</li>
 </ul>
 </section>
 <section id="reproducibility-check-rerunning-in-this-repository" class="level2">
 <h2 class="anchored" data-anchor-id="reproducibility-check-rerunning-in-this-repository">Reproducibility check: rerunning in this repository</h2>
 <p>The numbers above come from the original <code>dp-testing</code> runs. All of Adult was retrained here with this repository’s ported pipeline (<code>uv run python scripts/sweep.py --dataset adult</code>), on CPU and with newer library versions. Exact agreement is not expected, because GPU vs CPU and different library versions change the random noise draws. Close agreement shows the port behaves the same.</p>
-<p>On ε: for seeds 1 and 2 the balanced training set gives 93 batches per epoch, so the sampling rate is q = 1/93. Opacus then takes 92 steps per epoch, which gives ε ≈ 3.37 for those seeds in the rerun. The dp-testing files report 3.41 for every seed, which matches q = 1/92. The legacy figure is therefore slightly conservative for two seeds.</p>
+<p>On <span class="math inline">\(\varepsilon\)</span>: for seeds 1 and 2 the balanced training set gives 93 batches per epoch, so the sampling rate is <span class="math inline">\(q = 1/93\)</span>. Opacus then takes 92 steps per epoch, which gives <span class="math inline">\(\varepsilon \approx 3.37\)</span> for those seeds in the rerun. The dp-testing files report 3.41 for every seed, which matches <span class="math inline">\(q = 1/92\)</span>. The legacy figure is therefore slightly conservative for two seeds.</p>
 <div class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-07T07:27:49.104648Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-07T07:27:49.104534Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-07T07:27:49.131077Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-07T07:27:49.130677Z&quot;}}" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
@@ -920,7 +949,7 @@ Table&nbsp;4: Key numbers (means over 5 seeds): original dp-testing runs vs this
 <div id="tbl-adult-runs" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-07T07:27:49.132366Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-07T07:27:49.132266Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-07T07:27:49.139474Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-07T07:27:49.139146Z&quot;}}" data-execution_count="12">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-adult-runs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;5: Achieved privacy (RDP accountant) and final Z, means over seeds.
+Table&nbsp;5: Achieved privacy (RDP accountant) and final <span class="math inline">\(Z\)</span>, means over seeds.
 </figcaption>
 <div aria-describedby="tbl-adult-runs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-display" data-execution_count="12">
@@ -1524,7 +1553,7 @@ Table&nbsp;5: Achieved privacy (RDP accountant) and final Z, means over seeds.
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>Reproduction and Expansion of Esipova et al.&nbsp;(ICLR 2023) · Hunter College, Big Data Analytics</p>
+<p>Reproduction and Expansion of Esipova et al.&nbsp;(ICLR 2023) · By Kacper Lisowicz, Yunzhe Zheng, and Daniel Lin</p>
 </div>
     <div class="nav-footer-right">
       &nbsp;
